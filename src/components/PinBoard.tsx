@@ -126,9 +126,11 @@ export default function PinBoard() {
     // A link badge opens its url, then goes back to its spot.
     const linkTimer = useRef<number | undefined>(undefined);
     const openLink = useCallback((id: string) => {
+        // A badge with nothing to open just stays parked in the zone.
         const href = linkHref(shown as BoardSectionId, shownItem, id);
-        if (!href) return;
         setLink(id);
+        window.clearTimeout(linkTimer.current);
+        if (!href) return;
         if (href === contactLinks.cv) {
             const a = document.createElement("a");
             a.href = href;
@@ -136,7 +138,6 @@ export default function PinBoard() {
             a.click();
         } else if (href.startsWith("mailto:")) location.href = href;
         else window.open(href, "_blank", "noopener,noreferrer");
-        window.clearTimeout(linkTimer.current);
         linkTimer.current = window.setTimeout(() => setLink(null), 1200);
     }, [shown, shownItem]);
     const closeLink = useCallback(() => {
