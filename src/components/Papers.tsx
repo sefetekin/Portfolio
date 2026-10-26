@@ -34,11 +34,18 @@ export const sections: { id: SectionId; title: string; note: string }[] = [
 ];
 
 // Sections whose page is itself a board of pins rather than papers.
-export type BoardSectionId = "experience" | "research" | "contact" | "cv" | "collection";
+export type BoardSectionId =
+    | "experience"
+    | "research"
+    | "projects"
+    | "contact"
+    | "cv"
+    | "collection";
 export type PaperSectionId = Exclude<SectionId, BoardSectionId>;
 export const isBoardSection = (id: SectionId): id is BoardSectionId =>
     id === "experience" ||
     id === "research" ||
+    id === "projects" ||
     id === "contact" ||
     id === "cv" ||
     id === "collection";
@@ -82,6 +89,14 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
             badge: "ticket",
         },
     ],
+    projects: projects.map((p, i) => ({
+        id: p.id,
+        title: p.short ?? p.name,
+        sub: p.badge,
+        note: noteColors[(i + 3) % noteColors.length],
+        rot: [-4, 5, -6, 3, -2, 6][i % 6],
+        badge: wideBadges[(i + 2) % wideBadges.length],
+    })),
     contact: [
         { id: "github", title: "GitHub", note: "#ffffff", rot: -5, badge: "subway" },
         { id: "linkedin", title: "LinkedIn", note: "#ffffff", rot: 4, badge: "ubahn" },
@@ -107,7 +122,22 @@ export type Detail = {
     tags: string[];
     images: string[];
     photoSlots?: number; // placeholders to show while there are no images
+    links?: BoardItem[]; // badges that open a url when dropped, see linkHref
 };
+
+// Link badges on a project page, keyed by the ids used in `links`.
+const projectLinks = (p: (typeof projects)[number]) => ({
+    code: p.github,
+    live: p.demo,
+});
+
+export function linkHref(section: BoardSectionId, item: string | null, id: string) {
+    if (section === "projects") {
+        const p = projects.find((x) => x.id === item);
+        return p ? projectLinks(p)[id as "code" | "live"] : undefined;
+    }
+    return contactLinks[id];
+}
 
 // What a focused pin shows: its points and images, each as its own pin.
 export function detailFor(section: BoardSectionId, id: string): Detail | null {
@@ -122,6 +152,28 @@ export function detailFor(section: BoardSectionId, id: string): Detail | null {
             tags: [],
             images: b.photos.length ? b.photos : [],
             photoSlots: 3,
+        };
+    }
+    if (section === "projects") {
+        const p = projects.find((x) => x.id === id);
+        if (!p) return null;
+        const links: BoardItem[] = [];
+        if (p.github) links.push({ id: "code", title: "GitHub", note: "#ffffff", rot: -4, badge: "tube" });
+        if (p.demo)
+            links.push({
+                id: "live",
+                title: p.demo.includes("theforage.com") ? "Forage" : "Live site",
+                note: "#ffffff",
+                rot: 5,
+                badge: "boarding",
+            });
+        return {
+            title: p.name,
+            meta: p.badge ?? "Project",
+            points: [{ text: p.description }],
+            tags: p.stack,
+            images: p.images ?? [],
+            links,
         };
     }
     if (section === "experience") {
@@ -225,36 +277,6 @@ function About() {
     );
 }
 
-function Projects() {
-    const notes = noteStyles("projects", projects.length);
-    return (
-        <>
-            {projects.map((p, i) => (
-                <Paper key={p.id} i={i} note={notes[i]}>
-                    {p.badge && <span className="badge">{p.badge}</span>}
-                    <h3>{p.name}</h3>
-                    <p>{p.description}</p>
-                    <Chips items={p.stack} />
-                    {(p.github || p.demo) && (
-                        <div className="links">
-                            {p.github && (
-                                <a href={p.github} target="_blank" rel="noreferrer">
-                                    Code ↗
-                                </a>
-                            )}
-                            {p.demo && (
-                                <a href={p.demo} target="_blank" rel="noreferrer">
-                                    Live ↗
-                                </a>
-                            )}
-                        </div>
-                    )}
-                </Paper>
-            ))}
-        </>
-    );
-}
-
 function Skills() {
     const categories: Skill["category"][] = [
         "Languages",
@@ -305,8 +327,6 @@ export function SectionPapers({ id }: { id: PaperSectionId }) {
     switch (id) {
         case "about":
             return <About />;
-        case "projects":
-            return <Projects />;
         case "skills":
             return <Skills />;
     }
