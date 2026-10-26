@@ -5,6 +5,7 @@ import { personalInfo } from "@/data/portfolio";
 import DragBoard, { type BoardItem } from "./DragBoard";
 import DetailPins from "./Detail";
 import {
+    CVSheet,
     SectionPapers,
     boardItems,
     contactLinks,
@@ -50,7 +51,11 @@ const boardHint: Record<string, string> = {
     experience: "drop a role",
     research: "drop a project",
     contact: "drop a badge",
+    cv: "drop the badge",
 };
+
+// Boards whose badges open a link or a download rather than a page.
+const isLinkBoard = (id: SectionId) => id === "contact" || id === "cv";
 
 // Phones drop pins at the bottom, wider screens on the right.
 function Where() {
@@ -182,12 +187,18 @@ export default function PinBoard() {
                         <DragBoard
                             key={shown}
                             items={boardItems[shown]}
-                            active={shown === "contact" ? link : item}
-                            onOpen={shown === "contact" ? openLink : openItem}
-                            onClose={shown === "contact" ? closeLink : closeItem}
+                            active={isLinkBoard(shown) ? link : item}
+                            onOpen={isLinkBoard(shown) ? openLink : openItem}
+                            onClose={isLinkBoard(shown) ? closeLink : closeItem}
                             className="sub"
-                            pinClass={shown === "contact" ? "pin" : "pin wide"}
-                            zoneLabel={shown === "contact" ? "pin here to open" : "pin here to focus"}
+                            pinClass={isLinkBoard(shown) ? "pin" : "pin wide"}
+                            zoneLabel={
+                                shown === "cv"
+                                    ? "pin here to download"
+                                    : shown === "contact"
+                                      ? "pin here to open"
+                                      : "pin here to focus"
+                            }
                             zoneBack="pull it out to go back"
                         >
                             <div className="panel-head floating" data-keepout>
@@ -212,6 +223,7 @@ export default function PinBoard() {
                                     <p className="meta">{personalInfo.location}</p>
                                 </div>
                             )}
+                            {shown === "cv" && <CVSheet />}
                             <p className="hint" data-keepout>
                                 {boardHint[shown]}
                                 <Where />
@@ -232,7 +244,7 @@ export default function PinBoard() {
                                 ← back to the board
                             </button>
                         </div>
-                        <div className={shown === "cv" ? "papers single" : "papers"}>
+                        <div className="papers">
                             <SectionPapers id={shown} />
                         </div>
                     </section>

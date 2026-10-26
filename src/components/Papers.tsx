@@ -31,12 +31,12 @@ export const sections: { id: SectionId; title: string; note: string }[] = [
 ];
 
 // Sections whose page is itself a board of pins rather than papers.
-export type BoardSectionId = "experience" | "research" | "contact";
+export type BoardSectionId = "experience" | "research" | "contact" | "cv";
 export type PaperSectionId = Exclude<SectionId, BoardSectionId>;
 export const isBoardSection = (id: SectionId): id is BoardSectionId =>
-    id === "experience" || id === "research" || id === "contact";
+    id === "experience" || id === "research" || id === "contact" || id === "cv";
 
-// On the Contact board, dropping a badge opens the link instead of a page.
+// On the Contact and CV boards, dropping a badge opens the link instead of a page.
 export const contactLinks: Record<string, string> = {
     github: personalInfo.github,
     linkedin: personalInfo.linkedin,
@@ -81,6 +81,7 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
         { id: "email", title: "Email", note: "#ffffff", rot: -3, badge: "airmail" },
         { id: "cv", title: "Download CV", note: "#ffffff", rot: 5, badge: "luggage" },
     ],
+    cv: [{ id: "cv", title: "Download CV", note: "#ffffff", rot: -4, badge: "luggage" }],
 };
 
 export type Detail = {
@@ -93,7 +94,7 @@ export type Detail = {
 
 // What a focused pin shows: its points and images, each as its own pin.
 export function detailFor(section: BoardSectionId, id: string): Detail | null {
-    if (section === "contact") return null;
+    if (section === "contact" || section === "cv") return null;
     if (section === "experience") {
         const job = internships.find((j) => j.id === id);
         if (!job) return null;
@@ -249,14 +250,13 @@ function Skills() {
     );
 }
 
-function CV() {
+// The CV pinned up beside the Download CV badge on the CV board.
+export function CVSheet() {
     return (
-        <Paper i={1} wide>
+        <article className="paper cv-sheet" style={{ "--rot": "-0.5deg" } as React.CSSProperties} data-keepout>
+            <span className="tack" aria-hidden />
             <h3>Curriculum Vitae</h3>
             <p className="meta">One page, PDF, updated for 2026-27</p>
-            <a className="big-link" href={personalInfo.cv} download>
-                Download CV
-            </a>
             <object
                 className="cv-frame"
                 data={personalInfo.cv}
@@ -268,7 +268,7 @@ function CV() {
                     <a href={personalInfo.cv}>Open the CV</a> instead.
                 </p>
             </object>
-        </Paper>
+        </article>
     );
 }
 
@@ -280,7 +280,5 @@ export function SectionPapers({ id }: { id: PaperSectionId }) {
             return <Projects />;
         case "skills":
             return <Skills />;
-        case "cv":
-            return <CV />;
     }
 }
