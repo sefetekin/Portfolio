@@ -1,14 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import Movable from "./Movable";
 import { noteStyles } from "./notes";
 import type { Detail } from "./Papers";
 
 const tilt = (i: number) => ((i * 47) % 7) - 3;
-let topLayer = 1; // the last pin moved stays on top
 
-// A pin that sits in the flow of the page but can be dragged off its spot.
-// Touch only drags sideways so the page still scrolls vertically.
+// A pin that sits in the flow of the page until it is picked up.
 function Loose({
     i,
     className,
@@ -20,53 +18,18 @@ function Loose({
     style?: React.CSSProperties;
     children: React.ReactNode;
 }) {
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
-    const [lifted, setLifted] = useState(false);
-    const [layer, setLayer] = useState(0);
-    const start = useRef<{ id: number; x: number; y: number; ox: number; oy: number } | null>(
-        null,
-    );
-
     return (
-        <div
-            className={lifted ? `${className} lifted` : className}
-            style={
-                {
-                    ...style,
-                    "--rot": `${lifted ? 0 : tilt(i)}deg`,
-                    translate: `${offset.x}px ${offset.y}px`,
-                    zIndex: lifted ? 50 : layer,
-                } as React.CSSProperties
-            }
-            onPointerDown={(e) => {
-                if (e.button !== 0 || (e.target as HTMLElement).closest("a")) return;
-                e.currentTarget.setPointerCapture(e.pointerId);
-                start.current = { id: e.pointerId, x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y };
-                setLifted(true);
-            }}
-            onPointerMove={(e) => {
-                const s = start.current;
-                if (!s || s.id !== e.pointerId) return;
-                setOffset({ x: s.ox + e.clientX - s.x, y: s.oy + e.clientY - s.y });
-            }}
-            onPointerUp={() => {
-                start.current = null;
-                setLifted(false);
-                setLayer(++topLayer);
-            }}
-            onPointerCancel={() => {
-                start.current = null;
-                setLifted(false);
-            }}
-        >
+        <Movable className={className} style={{ ...style, "--rot": `${tilt(i)}deg` } as React.CSSProperties}>
             <span className="tack" aria-hidden />
             {children}
-        </div>
+        </Movable>
     );
 }
 
 export default function DetailPins({ detail }: { detail: Detail }) {
-    const images = detail.images.length ? detail.images : [null, null];
+    const images = detail.images.length
+        ? detail.images
+        : Array.from({ length: detail.photoSlots ?? 2 }, () => null);
     const notes = noteStyles(detail.title, detail.points.length + 1);
     let i = 0;
     return (

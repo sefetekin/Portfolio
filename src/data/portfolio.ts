@@ -15,8 +15,9 @@ export interface Project {
     stack: string[];
     github?: string;
     demo?: string;
+    short?: string; // name on the badge when the full name is long
     badge?: string;
-    image?: string;
+    images?: string[]; // paths under public/; placeholders are shown until set
 }
 
 export interface Skill {
@@ -137,6 +138,7 @@ export const projects: Project[] = [
     {
         id: "patients-app",
         name: "Patient Data Management System",
+        short: "Patient Data",
         description:
             "Web system for uploading CSVs, converting to JSON, displaying patient profiles, and visualizing metrics. Built with Java and Maven following MVC architecture.",
         stack: ["Java", "Maven", "MVC", "CSV Processing", "Data Visualization"],
@@ -155,6 +157,7 @@ export const projects: Project[] = [
     {
         id: "jp-morgan",
         name: "J.P. Morgan Virtual Experience",
+        short: "J.P. Morgan",
         description:
             "Used JPMorgan's Perspective to render live trading data in interactive graphs. Fixed broken local repository setup and gained experience with financial data visualization.",
         stack: [
@@ -170,10 +173,10 @@ export const projects: Project[] = [
         id: "portfolio-website",
         name: "Portfolio Website",
         description:
-            "This site: a fabric board of draggable metal pins. Drop a pin on the right to read its pinned pages. Built with Next.js and TypeScript.",
+            "This site: a fabric board of souvenir badges. Drop a badge on the drop zone to open its page. Built with Next.js and TypeScript.",
         stack: ["Next.js", "TypeScript", "Pointer Events", "CSS"],
         github: "https://github.com/sefetekin/Portfolio",
-        demo: "https://servetefetekin.vercel.app",
+        demo: "https://www.sefetekin.com",
         badge: "Web",
     },
 ];
@@ -237,6 +240,25 @@ export const education = [
         dates: "2023 - 2026",
         courses: ["Algorithms & Data Structures", "Software Engineering", "Machine Learning", "Financial Mathematics"],
     },
+];
+
+// Badges collected on travels. Each one is a pin on the Collection board;
+// dropping it shows the photos from that trip. Paths are under public/.
+export interface CollectedBadge {
+    id: string;
+    name: string;
+    place: string;
+    year?: string;
+    image?: string; // a photo of the badge itself, ideally cut out
+    photos: string[]; // trip pictures; placeholders are shown until set
+    story?: string;
+}
+
+export const collection: CollectedBadge[] = [
+    { id: "badge-1", name: "Badge one", place: "Somewhere in the world", photos: [] },
+    { id: "badge-2", name: "Badge two", place: "Somewhere in the world", photos: [] },
+    { id: "badge-3", name: "Badge three", place: "Somewhere in the world", photos: [] },
+    { id: "badge-4", name: "Badge four", place: "Somewhere in the world", photos: [] },
 ];
 
 export const personalInfo = {

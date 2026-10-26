@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { personalInfo } from "@/data/portfolio";
 import DragBoard, { type BoardItem } from "./DragBoard";
 import DetailPins from "./Detail";
+import Movable from "./Movable";
 import {
     CVSheet,
     SectionPapers,
@@ -11,7 +12,9 @@ import {
     contactLinks,
     detailFor,
     isBoardSection,
+    linkHref,
     sections,
+    type BoardSectionId,
     type SectionId,
 } from "./Papers";
 
@@ -24,6 +27,7 @@ const angles: Record<SectionId, number> = {
     skills: 7,
     cv: -8,
     contact: 3,
+    collection: -5,
 };
 
 // Every pin is a different souvenir badge, as if collected on travels.
@@ -35,6 +39,7 @@ const badges: Record<SectionId, string> = {
     skills: "nazar",
     cv: "plaque",
     contact: "patch",
+    collection: "passport",
 };
 
 const mainItems: BoardItem[] = sections.map((s) => ({
@@ -50,8 +55,10 @@ const isSection = (v: string): v is SectionId => sections.some((s) => s.id === v
 const boardHint: Record<string, string> = {
     experience: "drop a role",
     research: "drop a project",
+    projects: "drop a project",
     contact: "drop a badge",
     cv: "drop the badge",
+    collection: "drop a badge",
 };
 
 // Boards whose badges open a link or a download rather than a page.
@@ -74,7 +81,7 @@ export default function PinBoard() {
     const [item, setItem] = useState<string | null>(null);
     const [shown, setShown] = useState<SectionId>("about");
     const [shownItem, setShownItem] = useState<string | null>(null);
-    const [link, setLink] = useState<string | null>(null); // contact badge in the zone
+    const [link, setLink] = useState<string | null>(null); // link badge in the zone
     const sectionHeading = useRef<HTMLHeadingElement>(null);
     const itemHeading = useRef<HTMLHeadingElement>(null);
 
@@ -117,22 +124,23 @@ export default function PinBoard() {
     }, []);
     const closeItem = useCallback(() => setItem(null), []);
 
-    // A contact badge opens its link, then goes back to its spot.
+    // A link badge opens its url, then goes back to its spot.
     const linkTimer = useRef<number | undefined>(undefined);
     const openLink = useCallback((id: string) => {
-        const href = contactLinks[id];
-        if (!href) return;
+        // A badge with nothing to open just stays parked in the zone.
+        const href = linkHref(shown as BoardSectionId, shownItem, id);
         setLink(id);
-        if (id === "cv") {
+        window.clearTimeout(linkTimer.current);
+        if (!href) return;
+        if (href === contactLinks.cv) {
             const a = document.createElement("a");
             a.href = href;
             a.download = "";
             a.click();
         } else if (href.startsWith("mailto:")) location.href = href;
         else window.open(href, "_blank", "noopener,noreferrer");
-        window.clearTimeout(linkTimer.current);
         linkTimer.current = window.setTimeout(() => setLink(null), 1200);
-    }, []);
+    }, [shown, shownItem]);
     const closeLink = useCallback(() => {
         window.clearTimeout(linkTimer.current);
         setLink(null);
@@ -150,7 +158,11 @@ export default function PinBoard() {
     }, [item, closeItem, closeSection]);
 
     const current = sections.find((s) => s.id === shown)!;
-    const detail = isBoardSection(shown) && shownItem ? detailFor(shown, shownItem) : null;
+    // Memoised so a project's link badges keep their spots between renders.
+    const detail = useMemo(
+        () => (isBoardSection(shown) && shownItem ? detailFor(shown, shownItem) : null),
+        [shown, shownItem],
+    );
 
     return (
         <main className="viewport">
@@ -191,13 +203,17 @@ export default function PinBoard() {
                             onOpen={isLinkBoard(shown) ? openLink : openItem}
                             onClose={isLinkBoard(shown) ? closeLink : closeItem}
                             className="sub"
-                            pinClass={isLinkBoard(shown) ? "pin" : "pin wide"}
+                            pinClass={
+                                shown === "collection" ? "pin round" : isLinkBoard(shown) ? "pin" : "pin wide"
+                            }
                             zoneLabel={
                                 shown === "cv"
                                     ? "pin here to download"
                                     : shown === "contact"
                                       ? "pin here to open"
-                                      : "pin here to focus"
+                                      : shown === "collection"
+                                        ? "pin here for photos"
+                                        : "pin here to focus"
                             }
                             zoneBack="pull it out to go back"
                         >
@@ -210,7 +226,7 @@ export default function PinBoard() {
                                 </button>
                             </div>
                             {shown === "contact" && (
-                                <div
+                                <Movable
                                     className="paper note note-sticky contact-note"
                                     style={{ "--note": "#ffbf6b", "--rot": "-3deg" } as React.CSSProperties}
                                     data-keepout
@@ -221,7 +237,7 @@ export default function PinBoard() {
                                         <a href={contactLinks.email}>{personalInfo.email}</a>
                                     </p>
                                     <p className="meta">{personalInfo.location}</p>
-                                </div>
+                                </Movable>
                             )}
                             {shown === "cv" && <CVSheet />}
                             <p className="hint" data-keepout>
@@ -250,14 +266,24 @@ export default function PinBoard() {
                     </section>
                 )}
 
-                <section
-                    className="level panel level-2"
-                    aria-labelledby="item-title"
-                    inert={depth === 2 ? undefined : true}
-                >
-                    {detail && (
-                        <>
-                            <div className="panel-head">
+                {detail?.links?.length ? (
+                    // A project page: its notes on a sheet, its links as badges.
+                    <section
+                        className="level level-2"
+                        aria-labelledby="item-title"
+                        inert={depth === 2 ? undefined : true}
+                    >
+                        <DragBoard
+                            key={shownItem}
+                            items={detail.links}
+                            active={link}
+                            onOpen={openLink}
+                            onClose={closeLink}
+                            className="sub"
+                            zoneLabel="pin here to open"
+                            zoneBack="pull it out to go back"
+                        >
+                            <div className="panel-head floating" data-keepout>
                                 <div>
                                     <h2 id="item-title" ref={itemHeading} tabIndex={-1}>
                                         {detail.title}
@@ -268,10 +294,39 @@ export default function PinBoard() {
                                     ← back to {current.title}
                                 </button>
                             </div>
-                            <DetailPins key={shownItem} detail={detail} />
-                        </>
-                    )}
-                </section>
+                            <div className="project-sheet" data-keepout>
+                                <DetailPins detail={detail} />
+                            </div>
+                            <p className="hint link-hint" data-keepout>
+                                drop a link
+                                <Where />
+                            </p>
+                        </DragBoard>
+                    </section>
+                ) : (
+                    <section
+                        className="level panel level-2"
+                        aria-labelledby="item-title"
+                        inert={depth === 2 ? undefined : true}
+                    >
+                        {detail && (
+                            <>
+                                <div className="panel-head">
+                                    <div>
+                                        <h2 id="item-title" ref={itemHeading} tabIndex={-1}>
+                                            {detail.title}
+                                        </h2>
+                                        <p className="head-meta">{detail.meta}</p>
+                                    </div>
+                                    <button className="back" onClick={closeItem}>
+                                        ← back to {current.title}
+                                    </button>
+                                </div>
+                                <DetailPins key={shownItem} detail={detail} />
+                            </>
+                        )}
+                    </section>
+                )}
             </div>
         </main>
     );
