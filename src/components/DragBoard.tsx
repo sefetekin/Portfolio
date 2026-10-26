@@ -346,6 +346,7 @@ export default function DragBoard({
                         <span className="label">
                             {item.title}
                             {item.sub && <small>{item.sub}</small>}
+                            <span className="needle" aria-hidden />
                         </span>
                     </button>
                 );
