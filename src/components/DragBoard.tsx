@@ -8,6 +8,7 @@ export type BoardItem = {
     sub?: string;
     note: string;
     rot: number;
+    badge?: string; // souvenir style, see .b-* in globals.css
 };
 
 type Spot = { x: number; y: number }; // top-left of a pin, in board pixels
@@ -382,6 +383,7 @@ export default function DragBoard({
                 const isOpen = active === item.id;
                 const offstage = !!active && !isOpen;
                 const c = [pinClass];
+                if (item.badge) c.push("badge", `b-${item.badge}`);
                 if (dragging === item.id) c.push("dragging");
                 if (!spot) c.push("hidden");
                 if (phase[item.id]) c.push(phase[item.id]);

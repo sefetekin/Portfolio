@@ -697,3 +697,280 @@ a {
         animation: none;
     }
 }
+
+/* ---------- souvenir badges: every pin comes from somewhere else ---------- */
+
+/* Sizes are in em so the whole badge scales with the pin box. */
+.pin.badge {
+    font-size: calc(var(--pin-h) / 4);
+}
+
+.pin.badge .label {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: inherit;
+    font-size: 1em;
+    line-height: 1.1;
+}
+
+/* Main pins hold one line, so a leading emblem sits beside the word. */
+.pin.badge:not(.wide) .label {
+    flex-direction: row;
+}
+
+.pin.badge .label small {
+    color: inherit;
+    opacity: 0.75;
+}
+
+/* London: Underground roundel, a ring behind a blue bar. */
+.pin.b-roundel::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3.9em;
+    height: 3.9em;
+    transform: translate(-50%, -50%);
+    border: 0.72em solid #dc241f;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 1px #d9dce0,
+        inset 0 0 0 1px #d9dce0;
+}
+
+.pin.b-roundel .label {
+    min-width: 9.4em;
+    padding: 0.28em 0.8em;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #fff;
+    background: #0019a8;
+    box-shadow: 0 0 0 1px #d9dce0;
+}
+
+/* Washington: gold-rimmed navy enamel lapel pin. */
+.pin.b-enamel .label {
+    padding: 0.5em 1em;
+    border: 0.18em solid transparent;
+    border-radius: 999px;
+    font-family: var(--font-display), serif;
+    font-size: 0.82em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #f6d77e;
+    background:
+        linear-gradient(160deg, #273a78, #14204a) padding-box,
+        linear-gradient(135deg, #fff1b8, #c99a2e 40%, #fbe7a1 60%, #9c7420) border-box;
+    box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.25);
+}
+
+.pin.b-enamel .label::before {
+    content: "★";
+    margin-right: 0.4em;
+}
+
+/* Tokyo: cream pinback button with a red sun ring. */
+.pin.b-button .label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 6.8em;
+    height: 6.8em;
+    padding: 0;
+    border-radius: 50%;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.68em;
+    font-weight: 800;
+    color: #b3121f;
+    background:
+        radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.95), transparent 42%),
+        #f6efe1;
+    box-shadow:
+        inset 0 0 0 0.45em #f6efe1,
+        inset 0 0 0 0.75em #c8102e,
+        inset 0 -4px 8px rgba(0, 0, 0, 0.18),
+        0 0 0 0.12em #b7bcc3;
+}
+
+/* Paris: blue enamel street sign with a green frame. */
+.pin.b-paris .label {
+    padding: 0.95em 0.9em 0.4em;
+    border: 0.13em solid #fff;
+    border-radius: 0.45em;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.86em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(170deg, #2a5db5, #1b468f);
+    box-shadow: 0 0 0 0.22em #1d6b3a;
+}
+
+.pin.b-paris .label::before {
+    content: "5ᵉ Arrᵗ";
+    position: absolute;
+    top: 0.42em;
+    left: 0;
+    right: 0;
+    font-size: 0.5em;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    text-align: center;
+}
+
+/* Istanbul: nazar eye on a white ribbon. */
+.pin.b-nazar .label {
+    padding: 0.4em 1em 0.4em 2.5em;
+    border-radius: 999px;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.9em;
+    font-weight: 700;
+    color: #0d3f91;
+    background: linear-gradient(#ffffff, #e6edf5);
+}
+
+.pin.b-nazar .label::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -0.6em;
+    width: 2.8em;
+    height: 2.8em;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 36% 30%, rgba(255, 255, 255, 0.7), transparent 30%),
+        radial-gradient(circle, #111 0 16%, #8fd3f4 17% 33%, #fff 34% 50%, #0d47a1 51%);
+}
+
+/* Bern: engraved brass plate with two rivets. */
+.pin.b-plaque .label {
+    padding: 0.45em 1.5em;
+    border-radius: 0.12em;
+    font-family: var(--font-display), serif;
+    font-size: 1.05em;
+    letter-spacing: 0.14em;
+    color: #4a3510;
+    text-shadow: 0 1px 0 rgba(255, 240, 190, 0.65);
+    background:
+        radial-gradient(circle at 0.6em 50%, #fff3c4 0 0.08em, #7a5a1c 0.12em 0.2em, transparent 0.24em),
+        radial-gradient(circle at calc(100% - 0.6em) 50%, #fff3c4 0 0.08em, #7a5a1c 0.12em 0.2em, transparent 0.24em),
+        linear-gradient(170deg, #f3dc8c, #c9a24a 45%, #ecd384 60%, #a8812f);
+    box-shadow: inset 0 0 0 1px rgba(90, 60, 10, 0.5);
+}
+
+/* Zermatt: red embroidered patch with a stitched edge. */
+.pin.b-patch .label {
+    padding: 0.55em 1em;
+    border-radius: 0.6em;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.92em;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+    background:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 4px),
+        #c8102e;
+    box-shadow: 0 0 0 0.22em #9e0b23;
+    outline: 0.11em dashed rgba(255, 255, 255, 0.85);
+    outline-offset: -0.32em;
+}
+
+.pin.b-patch .label::before {
+    content: "✚";
+    margin-right: 0.35em;
+}
+
+/* The wide pins on the Experience and Research boards fill their box. */
+.pin.wide.badge .label {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    text-align: center;
+}
+
+/* Rome: a train ticket with a torn-off stub. */
+.pin.b-ticket .label {
+    padding-right: 2.2em;
+    color: #3b2a14;
+    background:
+        repeating-linear-gradient(transparent 0 5px, rgba(59, 42, 20, 0.45) 5px 9px) calc(100% - 1.6em) 0 / 1px
+            100% no-repeat,
+        linear-gradient(170deg, #f6e6c4, #ead2a2);
+    -webkit-mask:
+        radial-gradient(circle at calc(100% - 1.6em) 0, transparent 0.45em, #000 0.5em) top / 100% 51% no-repeat,
+        radial-gradient(circle at calc(100% - 1.6em) 100%, transparent 0.45em, #000 0.5em) bottom / 100% 51%
+            no-repeat;
+    mask:
+        radial-gradient(circle at calc(100% - 1.6em) 0, transparent 0.45em, #000 0.5em) top / 100% 51% no-repeat,
+        radial-gradient(circle at calc(100% - 1.6em) 100%, transparent 0.45em, #000 0.5em) bottom / 100% 51%
+            no-repeat;
+}
+
+.pin.b-ticket .label::after {
+    content: "ADMIT ONE";
+    position: absolute;
+    top: 50%;
+    right: 0.1em;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.32em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    transform: translateY(-50%) rotate(90deg);
+}
+
+/* Lisbon: a postage stamp with perforated edges. */
+.pin.b-stamp .label {
+    padding: 18px;
+    font-size: 0.92em;
+    color: #133f57;
+    background: #f7f1e3;
+    box-shadow:
+        inset 0 0 0 12px #f7f1e3,
+        inset 0 0 0 14px #2f7a9e;
+    -webkit-mask:
+        linear-gradient(#000 0 0) center / calc(100% - 20px) calc(100% - 20px) no-repeat,
+        radial-gradient(circle 4px, transparent 97%, #000) -5px -5px / 10px 10px round;
+    mask:
+        linear-gradient(#000 0 0) center / calc(100% - 20px) calc(100% - 20px) no-repeat,
+        radial-gradient(circle 4px, transparent 97%, #000) -5px -5px / 10px 10px round;
+}
+
+/* Kyoto: a manila luggage tag with a reinforced hole. */
+.pin.b-tag .label {
+    padding-left: 1.6em;
+    color: #4a3112;
+    background:
+        radial-gradient(circle at 0.75em 50%, transparent 0.2em, #b98a3e 0.22em 0.36em, transparent 0.38em),
+        linear-gradient(170deg, #ecd29a, #d8b26b);
+    clip-path: polygon(1.1em 0, 100% 0, 100% 100%, 1.1em 100%, 0 calc(100% - 1.1em), 0 1.1em);
+}
+
+.pin.wide.b-plaque .label {
+    padding: 0.4em 1.3em;
+    font-size: 0.78em;
+    letter-spacing: 0.06em;
+}
+
+/* The wide pins leave their small print readable on light badges. */
+.pin.wide.badge .label small {
+    color: inherit;
+}
+
+@media (max-width: 640px) {
+    .pin.b-stamp .label {
+        padding: 14px;
+    }
+    .pin.b-enamel .label {
+        padding: 0.45em 0.7em;
+        letter-spacing: 0.03em;
+    }
+}

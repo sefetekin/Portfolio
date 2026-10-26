@@ -24,11 +24,23 @@ const angles: Record<SectionId, number> = {
     contact: 3,
 };
 
+// Every pin is a different souvenir badge, as if collected on travels.
+const badges: Record<SectionId, string> = {
+    about: "roundel",
+    experience: "enamel",
+    research: "button",
+    projects: "paris",
+    skills: "nazar",
+    cv: "plaque",
+    contact: "patch",
+};
+
 const mainItems: BoardItem[] = sections.map((s) => ({
     id: s.id,
     title: s.title,
     note: s.note,
     rot: angles[s.id],
+    badge: badges[s.id],
 }));
 
 const isSection = (v: string): v is SectionId => sections.some((s) => s.id === v);
