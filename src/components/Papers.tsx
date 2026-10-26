@@ -1,3 +1,4 @@
+import type { BoardItem } from "./DragBoard";
 import {
     certifications,
     education,
@@ -27,6 +28,75 @@ export const sections: { id: SectionId; title: string; note: string }[] = [
     { id: "cv", title: "CV", note: "#ffffff" },
     { id: "contact", title: "Contact", note: "#f1d9ff" },
 ];
+
+// Sections whose page is itself a board of pins rather than papers.
+export type BoardSectionId = "experience" | "research";
+export type PaperSectionId = Exclude<SectionId, BoardSectionId>;
+export const isBoardSection = (id: SectionId): id is BoardSectionId =>
+    id === "experience" || id === "research";
+
+const noteColors = ["#fff3a8", "#ffd6c9", "#cdeccd", "#cfe3ff", "#f1d9ff", "#ffe2a8"];
+
+export const boardItems: Record<BoardSectionId, BoardItem[]> = {
+    experience: internships.map((job, i) => ({
+        id: job.id,
+        title: job.title,
+        sub: `${job.company} · ${job.dates.slice(-4)}`,
+        note: noteColors[i % noteColors.length],
+        rot: [-5, 4, -2, 6, -6][i % 5],
+    })),
+    research: [
+        ...research.map((r, i) => ({
+            id: r.id,
+            title: r.short,
+            sub: r.dates.slice(-4),
+            note: noteColors[(i + 2) % noteColors.length],
+            rot: [4, -5, 3, -3][i % 4],
+        })),
+        { id: "certifications", title: "Certifications", sub: "& courses", note: "#ffffff", rot: -4 },
+    ],
+};
+
+export type Detail = {
+    title: string;
+    meta: string;
+    points: { text: string; meta?: string }[];
+    tags: string[];
+    images: string[];
+};
+
+// What a focused pin shows: its points and images, each as its own pin.
+export function detailFor(section: BoardSectionId, id: string): Detail | null {
+    if (section === "experience") {
+        const job = internships.find((j) => j.id === id);
+        if (!job) return null;
+        return {
+            title: job.title,
+            meta: `${job.company} · ${job.dates}`,
+            points: job.achievements.map((text) => ({ text })),
+            tags: job.technologies,
+            images: job.images ?? [],
+        };
+    }
+    if (id === "certifications") {
+        return {
+            title: "Certifications & courses",
+            meta: "Things I've studied alongside my degrees",
+            points: certifications.map((c) => ({ text: c.name, meta: `${c.issuer} · ${c.date}` })),
+            tags: [],
+            images: [],
+        };
+    }
+    const r = research.find((x) => x.id === id);
+    if (!r) return null;
+    return {
+        title: r.title,
+        meta: r.dates,
+        points: r.points.map((text) => ({ text })),
+        tags: [],
+        images: r.images ?? [],
+    };
+}
 
 // A stable, slightly crooked angle per paper so the board feels hand-pinned.
 const tilt = (i: number) => `${(((i * 37) % 5) - 2) * 0.5}deg`;
@@ -87,59 +157,6 @@ function About() {
             <Paper i={2}>
                 <h3>Fun fact</h3>
                 <p>{personalInfo.funFact}</p>
-            </Paper>
-        </>
-    );
-}
-
-function Experience() {
-    return (
-        <>
-            {internships.map((job, i) => (
-                <Paper key={job.id} i={i}>
-                    <h3>{job.title}</h3>
-                    <p className="meta">
-                        {job.company} · {job.dates}
-                    </p>
-                    <ul>
-                        {job.achievements.map((a) => (
-                            <li key={a}>{a}</li>
-                        ))}
-                    </ul>
-                    <Chips items={job.technologies} />
-                </Paper>
-            ))}
-        </>
-    );
-}
-
-function Research() {
-    return (
-        <>
-            {research.map((r, i) => (
-                <Paper key={r.id} i={i}>
-                    <h3>{r.title}</h3>
-                    <p className="meta">{r.dates}</p>
-                    <ul>
-                        {r.points.map((pt) => (
-                            <li key={pt}>{pt}</li>
-                        ))}
-                    </ul>
-                </Paper>
-            ))}
-            <Paper i={research.length}>
-                <h3>Certifications & courses</h3>
-                <ul>
-                    {certifications.map((c) => (
-                        <li key={c.name}>
-                            {c.name}
-                            <br />
-                            <span className="meta">
-                                {c.issuer} · {c.date}
-                            </span>
-                        </li>
-                    ))}
-                </ul>
             </Paper>
         </>
     );
@@ -246,14 +263,10 @@ function Contact() {
     );
 }
 
-export function SectionPapers({ id }: { id: SectionId }) {
+export function SectionPapers({ id }: { id: PaperSectionId }) {
     switch (id) {
         case "about":
             return <About />;
-        case "experience":
-            return <Experience />;
-        case "research":
-            return <Research />;
         case "projects":
             return <Projects />;
         case "skills":

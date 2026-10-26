@@ -5,6 +5,7 @@ export interface Internship {
     dates: string;
     achievements: string[];
     technologies: string[];
+    images?: string[]; // paths under public/; placeholders are shown until set
 }
 
 export interface Project {
@@ -70,14 +71,17 @@ export const internships: Internship[] = [
 export interface Research {
     id: string;
     title: string;
+    short: string;
     dates: string;
     points: string[];
+    images?: string[]; // paths under public/; placeholders are shown until set
 }
 
 export const research: Research[] = [
     {
         id: "games-ml",
         title: "Machine Learning-Driven Content Generation and Adaptation in Video Games",
+        short: "ML content generation in games",
         dates: "Sep 2025 - May 2026",
         points: [
             "Applied Phase-Preserving Diffusion to generate in-game assets from player traits and base templates in 5 s each",
@@ -88,6 +92,7 @@ export const research: Research[] = [
     {
         id: "convex-hull",
         title: "Performance Evaluation and Comparative Analysis of Convex Hull Algorithms",
+        short: "Convex hull algorithms",
         dates: "Jan 2024 - Mar 2024",
         points: [
             "Benchmarked 3 convex hull algorithms (Graham scan, Jarvis march, Quickhull) on synthetic sets",
@@ -96,6 +101,7 @@ export const research: Research[] = [
     {
         id: "knee-xray",
         title: "Classifying Knee X-Rays into Categories of Knee Osteoarthritis",
+        short: "Knee X-ray classification",
         dates: "Sep 2021 - Apr 2022",
         points: [
             "Trained a CNN (TensorFlow, Python) on 2,000 X-ray images to classify knee osteoarthritis into 3 severity classes",
