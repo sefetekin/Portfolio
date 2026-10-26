@@ -1,4 +1,5 @@
 import type { BoardItem } from "./DragBoard";
+import { noteStyles, type NoteStyle } from "./notes";
 import {
     certifications,
     education,
@@ -115,16 +116,21 @@ const tilt = (i: number) => `${(((i * 37) % 5) - 2) * 0.5}deg`;
 function Paper({
     i,
     wide,
+    note,
     children,
 }: {
     i: number;
     wide?: boolean;
+    note?: NoteStyle;
     children: React.ReactNode;
 }) {
+    const cls = ["paper"];
+    if (wide) cls.push("wide");
+    if (note) cls.push("note", note.className);
     return (
         <article
-            className={wide ? "paper wide" : "paper"}
-            style={{ "--rot": tilt(i) } as React.CSSProperties}
+            className={cls.join(" ")}
+            style={{ ...note?.style, "--rot": tilt(i) } as React.CSSProperties}
         >
             <span className="tack" aria-hidden />
             {children}
@@ -145,13 +151,14 @@ function Chips({ items }: { items: string[] }) {
 }
 
 function About() {
+    const notes = noteStyles("about", 3);
     return (
         <>
-            <Paper i={0}>
+            <Paper i={0} note={notes[0]}>
                 <h3>Hi, I&apos;m Efe.</h3>
                 <p>{personalInfo.about}</p>
             </Paper>
-            <Paper i={1}>
+            <Paper i={1} note={notes[1]}>
                 <h3>Education</h3>
                 {education.map((e) => (
                     <div key={e.school}>
@@ -165,7 +172,7 @@ function About() {
                 ))}
                 <p className="meta">Based in {personalInfo.location}</p>
             </Paper>
-            <Paper i={2}>
+            <Paper i={2} note={notes[2]}>
                 <h3>Fun fact</h3>
                 <p>{personalInfo.funFact}</p>
             </Paper>
@@ -174,10 +181,11 @@ function About() {
 }
 
 function Projects() {
+    const notes = noteStyles("projects", projects.length);
     return (
         <>
             {projects.map((p, i) => (
-                <Paper key={p.id} i={i}>
+                <Paper key={p.id} i={i} note={notes[i]}>
                     {p.badge && <span className="badge">{p.badge}</span>}
                     <h3>{p.name}</h3>
                     <p>{p.description}</p>
@@ -209,10 +217,11 @@ function Skills() {
         "Tools",
         "Concepts",
     ];
+    const notes = noteStyles("skills", categories.length);
     return (
         <>
             {categories.map((c, i) => (
-                <Paper key={c} i={i}>
+                <Paper key={c} i={i} note={notes[i]}>
                     <h3>{c}</h3>
                     <Chips
                         items={skills
@@ -249,16 +258,17 @@ function CV() {
 }
 
 function Contact() {
+    const notes = noteStyles("contact", 2);
     return (
         <>
-            <Paper i={0}>
+            <Paper i={0} note={notes[0]}>
                 <h3>Say hello</h3>
                 <p>The quickest way to reach me is email.</p>
                 <a className="big-link" href={`mailto:${personalInfo.email}`}>
                     {personalInfo.email}
                 </a>
             </Paper>
-            <Paper i={1}>
+            <Paper i={1} note={notes[1]}>
                 <h3>Elsewhere</h3>
                 <div className="links">
                     <a href={personalInfo.github} target="_blank" rel="noreferrer">

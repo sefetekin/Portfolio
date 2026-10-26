@@ -630,8 +630,8 @@ a {
     }
 }
 
-/* Bullet points are pinned up on a mix of papers. */
-.loose.note {
+/* Long text is pinned up on a mix of post-its and papers (see notes.ts). */
+.note {
     color: var(--ink);
 }
 
@@ -639,11 +639,22 @@ a {
     box-shadow: 0 20px 28px rgba(10, 0, 3, 0.5);
 }
 
-/* Square sticky note in its own colour, curling off the cloth at the bottom. */
-.loose.sticky {
-    width: 230px;
-    min-height: 220px;
+.paper.note {
+    line-height: 1.5;
+}
+
+.paper.note h3 {
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.loose.note {
+    width: 250px;
     padding: 30px 18px 18px;
+}
+
+/* Square sticky note in its own colour, curling off the cloth at the bottom. */
+.note-sticky {
     background:
         linear-gradient(170deg, rgba(255, 255, 255, 0.3), transparent 45%),
         linear-gradient(transparent 85%, rgba(0, 0, 0, 0.06)),
@@ -653,18 +664,41 @@ a {
         0 14px 12px -8px rgba(10, 0, 3, 0.6);
 }
 
-.loose.sticky p,
-.loose.grid p,
-.loose.torn p {
+.loose.note-sticky {
+    width: 230px;
+    min-height: 220px;
+}
+
+.paper.note-sticky {
+    min-height: 240px;
+}
+
+.note-sticky p,
+.note-grid p,
+.note-torn p,
+.note-sticky h3,
+.note-grid h3,
+.note-torn h3 {
     font-family: var(--font-hand), cursive;
     font-size: 21px;
     line-height: 1.15;
 }
 
+.note-sticky h3,
+.note-grid h3,
+.note-torn h3 {
+    font-size: 28px;
+}
+
+.note p.meta {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 /* Ruled index card with a red header line. */
-.loose.index {
-    width: 270px;
-    padding: 38px 18px 14px;
+.note-index {
+    padding-top: 38px;
     background:
         linear-gradient(#e57373, #e57373) 0 33px / 100% 2px no-repeat,
         repeating-linear-gradient(transparent 0 23px, #a9cbe8 23px 24px) 0 40px / 100% calc(100% - 40px)
@@ -672,15 +706,32 @@ a {
         #fdfcf7;
 }
 
-.loose.index p,
-.loose.torn p {
+.loose.note-index {
+    width: 270px;
+    padding-top: 38px;
+}
+
+.note-index p,
+.note-torn p {
     line-height: 24px;
 }
 
+/* On a full paper the heading sits above the red line, and the text on the rules. */
+.paper.note-index {
+    padding-top: 8px;
+}
+
+.paper.note-index h3 {
+    margin: 0 0 8px;
+    line-height: 24px;
+}
+
+.paper.note-index p {
+    margin-bottom: 24px;
+}
+
 /* Graph paper written on in blue pen. */
-.loose.grid {
-    width: 250px;
-    padding: 30px 18px 18px;
+.note-grid {
     color: #1c3557;
     background:
         linear-gradient(#d3e3f0 1px, transparent 1px) 0 0 / 16px 16px,
@@ -689,9 +740,7 @@ a {
 }
 
 /* Notebook page torn out along the bottom. */
-.loose.torn {
-    width: 250px;
-    padding: 30px 16px 16px 42px;
+.note-torn {
     color: #26324d;
     background:
         linear-gradient(90deg, transparent 30px, #f19999 30px 31px, transparent 31px),
@@ -699,7 +748,11 @@ a {
         #fffef9;
 }
 
-.loose.torn::after {
+.note.note-torn {
+    padding-left: 42px;
+}
+
+.note-torn::after {
     content: "";
     position: absolute;
     left: 0;
@@ -710,25 +763,32 @@ a {
 }
 
 /* Brown kraft paper. */
-.loose.kraft {
-    width: 240px;
+.note-kraft {
     color: #3a2712;
     background:
         radial-gradient(rgba(60, 35, 10, 0.12) 1px, transparent 1.5px) 0 0 / 7px 7px,
         linear-gradient(170deg, #d4ae7c, #c39760);
 }
 
-.loose.kraft p.meta {
+.note-kraft .meta,
+.note-kraft p.meta {
     color: #5a3f1e;
 }
 
-.loose.kraft .chip {
+.note-kraft .chip {
     border-color: rgba(58, 39, 18, 0.4);
+}
+
+.note .chip {
+    font-family: var(--font-body), system-ui, sans-serif;
 }
 
 @media (max-width: 640px) {
     .loose.note {
         width: 100%;
+        min-height: 0;
+    }
+    .paper.note-sticky {
         min-height: 0;
     }
 }
