@@ -1,4 +1,4 @@
-# Generates public/fabric.jpg, the woven linen tile behind the boards.
+# Generates public/fabric.jpg, the woven burgundy fabric tile behind the boards.
 # Usage: python3 scripts/fabric.py public/fabric.jpg  (needs numpy and Pillow)
 import numpy as np, sys
 from PIL import Image
@@ -70,12 +70,12 @@ flecks = (pnoise((N, N), 0.7) > 3.1) * -0.25
 lum = lum + flecks
 lum = np.clip(lum, 0, 1.3)
 
-# Natural linen colour, darker in the gaps.
-base = np.array([214, 190, 150]) / 255
-shadow = np.array([120, 92, 60]) / 255
+# Burgundy wool-linen, darker in the gaps.
+base = np.array([116, 24, 40]) / 255
+shadow = np.array([36, 5, 12]) / 255
 t = np.clip(lum, 0, 1)[..., None]
 rgb = shadow + (base - shadow) * t
 rgb = rgb * (1 + 0.08 * (lum[..., None] - 1).clip(0, None) * 3)
-rgb += 0.015 * np.stack([warp_tone[xi], np.zeros_like(lum), -weft_tone[yi]], -1) * 0.5
+rgb += 0.012 * np.stack([warp_tone[xi], np.zeros_like(lum), weft_tone[yi]], -1) * 0.5
 img = Image.fromarray((np.clip(rgb, 0, 1) * 255).astype(np.uint8))
 img.save(sys.argv[1], quality=82, optimize=True, progressive=True)
