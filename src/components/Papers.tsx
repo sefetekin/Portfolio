@@ -1,4 +1,5 @@
 import type { BoardItem } from "./DragBoard";
+import Movable from "./Movable";
 import { noteStyles, type NoteStyle } from "./notes";
 import {
     certifications,
@@ -225,13 +226,14 @@ function Paper({
     if (wide) cls.push("wide");
     if (note) cls.push("note", note.className);
     return (
-        <article
+        <Movable
+            as="article"
             className={cls.join(" ")}
             style={{ ...note?.style, "--rot": tilt(i) } as React.CSSProperties}
         >
             <span className="tack" aria-hidden />
             {children}
-        </article>
+        </Movable>
     );
 }
 
@@ -304,7 +306,12 @@ function Skills() {
 // The CV pinned up beside the Download CV badge on the CV board.
 export function CVSheet() {
     return (
-        <article className="paper cv-sheet" style={{ "--rot": "-0.5deg" } as React.CSSProperties} data-keepout>
+        <Movable
+            as="article"
+            className="paper cv-sheet"
+            style={{ "--rot": "-0.5deg" } as React.CSSProperties}
+            data-keepout
+        >
             <span className="tack" aria-hidden />
             <h3>Curriculum Vitae</h3>
             <p className="meta">One page, PDF, updated for 2026-27</p>
@@ -319,7 +326,7 @@ export function CVSheet() {
                     <a href={personalInfo.cv}>Open the CV</a> instead.
                 </p>
             </object>
-        </article>
+        </Movable>
     );
 }
 

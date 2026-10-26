@@ -1504,7 +1504,6 @@ a {
     padding: 14px 10px 32px;
     overflow-y: auto;
     touch-action: pan-y;
-    mask-image: linear-gradient(#000 calc(100% - 32px), transparent);
 }
 
 .project-sheet .loose.note {
@@ -1574,4 +1573,28 @@ a {
     .link-hint {
         display: none;
     }
+}
+
+/* ---------- papers you can pick up ---------- */
+
+/* Every paper, note and photo can be moved anywhere on the board, the drop
+   zone included, where it just stays put. */
+.movable {
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+}
+
+.movable a {
+    user-select: text;
+}
+
+.movable.lifted {
+    cursor: grabbing;
+    transform: rotate(0deg) scale(1.04);
+    box-shadow: 0 20px 28px rgba(40, 20, 5, 0.42);
+}
+
+.movable-hold {
+    flex: none;
 }

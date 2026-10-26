@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { personalInfo } from "@/data/portfolio";
 import DragBoard, { type BoardItem } from "./DragBoard";
 import DetailPins from "./Detail";
+import Movable from "./Movable";
 import {
     CVSheet,
     SectionPapers,
@@ -225,7 +226,7 @@ export default function PinBoard() {
                                 </button>
                             </div>
                             {shown === "contact" && (
-                                <div
+                                <Movable
                                     className="paper note note-sticky contact-note"
                                     style={{ "--note": "#ffbf6b", "--rot": "-3deg" } as React.CSSProperties}
                                     data-keepout
@@ -236,7 +237,7 @@ export default function PinBoard() {
                                         <a href={contactLinks.email}>{personalInfo.email}</a>
                                     </p>
                                     <p className="meta">{personalInfo.location}</p>
-                                </div>
+                                </Movable>
                             )}
                             {shown === "cv" && <CVSheet />}
                             <p className="hint" data-keepout>
