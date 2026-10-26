@@ -88,7 +88,6 @@ export const projects: Project[] = [
         description:
             "An accessible chatbot platform for community café supporting people with visual and auditory impairments. Features screen reader support, font-size adjustment, high-contrast mode, and dyslexia-friendly options.",
         stack: ["React", "Flask", "SQL", "Accessibility Design", "Voice Input"],
-        github: "https://github.com/sefetekin23/dialogue-hub",
         badge: "Accessibility",
     },
     {
@@ -97,7 +96,7 @@ export const projects: Project[] = [
         description:
             "A mentorship web app for high school students built with MVC principles. Features authentication, search, filtering, and SQL storage for connecting students with mentors.",
         stack: ["C#", ".NET", "MVC", "SQL", "Authentication"],
-        github: "https://github.com/sefetekin23/UniMentiMVC",
+        github: "https://github.com/sefetekin/UniMentiMVC",
         badge: "Education",
     },
     {
@@ -106,7 +105,7 @@ export const projects: Project[] = [
         description:
             "Web system for uploading CSVs, converting to JSON, displaying patient profiles, and visualizing metrics. Built with Java and Maven following MVC architecture.",
         stack: ["Java", "Maven", "MVC", "CSV Processing", "Data Visualization"],
-        github: "https://github.com/sefetekin23/PatientsApp",
+        github: "https://github.com/sefetekin/PatientsApp",
         badge: "Healthcare",
     },
     {
@@ -115,7 +114,7 @@ export const projects: Project[] = [
         description:
             "A Python-based project showcasing data analysis and machine learning capabilities. Features data processing and visualization using modern Python libraries.",
         stack: ["Python", "Data Analysis", "Machine Learning", "Visualization"],
-        github: "https://github.com/sefetekin23/horizon",
+        github: "https://github.com/sefetekin/horizon",
         badge: "Data Science",
     },
     {
@@ -136,9 +135,9 @@ export const projects: Project[] = [
         id: "portfolio-website",
         name: "Portfolio Website",
         description:
-            "A modern, responsive portfolio website with dark theme and interactive animations built with Next.js and TypeScript.",
-        stack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
-        github: "https://github.com/sefetekin23/Portfolio",
+            "This site: a cork board of draggable pins. Drop a pin on the right to read its pinned pages. Built with Next.js and TypeScript.",
+        stack: ["Next.js", "TypeScript", "Pointer Events", "CSS"],
+        github: "https://github.com/sefetekin/Portfolio",
         demo: "https://servetefetekin.vercel.app",
         badge: "Web",
     },
@@ -190,19 +189,19 @@ export const personalInfo = {
     name: "Servet Efe Tekin",
     tagline: "2nd Year CS Student @UCL • Software Engineer • Tech Enthusiast",
     subtitle: "Building accessible tech. Exploring the future.",
-    about: `I&apos;m a Second-Year BSc Computer Science student at University College London (UCL) with a minor in Mathematics, 
-    achieving a 1st Class standing (74.3%). Originally from Istanbul, Turkey, I&apos;m passionate about software engineering 
-    and making people&apos;s lives easier through technology. I&apos;m a founding member and treasurer of the UCL Game Development 
+    about: `I'm a Second-Year BSc Computer Science student at University College London (UCL) with a minor in Mathematics, 
+    achieving a 1st Class standing (74.3%). Originally from Istanbul, Turkey, I'm passionate about software engineering 
+    and making people's lives easier through technology. I'm a founding member and treasurer of the UCL Game Development 
     Society, and treasurer of the Turkish Society. My experience spans from high-frequency trading systems at Squarepoint 
     Capital to accessible web development at Avanade.`,
     funFact:
-        "I&apos;ve been playing video games for years - not just for fun, but for the knowledge they provide. They&apos;ve been my gateway into computer science!",
+        "I've been playing video games for years - not just for fun, but for the knowledge they provide. They've been my gateway into computer science!",
     education:
         "BSc Computer Science (1st Class, 74.3%), Minor in Mathematics, University College London (UCL)",
     location: "London, UK",
     email: "sefetekin@gmail.com",
     phone: "+44 7748651665",
-    github: "https://github.com/sefetekin23",
+    github: "https://github.com/sefetekin",
     linkedin: "https://linkedin.com/in/efe-tekin",
     website: "https://servetefetekin.com",
     cv: "/cv-servet-efetekin.pdf",

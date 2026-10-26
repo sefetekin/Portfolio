@@ -1,44 +1,38 @@
-import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Caveat, Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const body = Inter({
     subsets: ["latin"],
-    variable: "--font-inter",
+    variable: "--font-body",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const hand = Caveat({
     subsets: ["latin"],
-    variable: "--font-jetbrains-mono",
+    weight: ["500", "700"],
+    variable: "--font-hand",
 });
+
+const description =
+    "Servet Efe Tekin: Computer Science student at UCL and software engineer. Drag a pin across the board to read about my experience, projects and CV.";
 
 export const metadata: Metadata = {
-    title: "Servet Efe Tekin - CS Student & Developer",
-    description:
-        "Computer Science student at UCL with expertise in high-performance systems, blockchain technology, and software development.",
-    keywords: [
-        "Computer Science",
-        "Software Engineering",
-        "Blockchain",
-        "UCL",
-        "Developer",
-        "Portfolio",
-    ],
+    title: "Servet Efe Tekin",
+    description,
     authors: [{ name: "Servet Efe Tekin" }],
     creator: "Servet Efe Tekin",
     openGraph: {
-        title: "Servet Efe Tekin - CS Student & Developer",
-        description:
-            "Computer Science student at UCL with expertise in high-performance systems, blockchain technology, and software development.",
+        title: "Servet Efe Tekin",
+        description,
         type: "website",
         locale: "en_US",
     },
-    twitter: {
-        card: "summary_large_image",
-        title: "Servet Efe Tekin - CS Student & Developer",
-        description:
-            "Computer Science student at UCL with expertise in high-performance systems, blockchain technology, and software development.",
-    },
+};
+
+export const viewport: Viewport = {
+    width: "device-width",
+    initialScale: 1,
+    themeColor: "#6b4423",
 };
 
 export default function RootLayout({
@@ -47,18 +41,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="dark">
-            <head>
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link
-                    rel="preconnect"
-                    href="https://fonts.gstatic.com"
-                    crossOrigin="anonymous"
-                />
-            </head>
-            <body
-                className={`${inter.variable} ${jetbrainsMono.variable} font-sans bg-background text-foreground antialiased`}
-            >
+        <html lang="en">
+            <body className={`${body.variable} ${hand.variable}`}>
                 {children}
             </body>
         </html>
