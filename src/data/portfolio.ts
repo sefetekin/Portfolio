@@ -170,7 +170,7 @@ export const projects: Project[] = [
         id: "portfolio-website",
         name: "Portfolio Website",
         description:
-            "This site: a cork board of draggable pins. Drop a pin on the right to read its pinned pages. Built with Next.js and TypeScript.",
+            "This site: a fabric board of draggable metal pins. Drop a pin on the right to read its pinned pages. Built with Next.js and TypeScript.",
         stack: ["Next.js", "TypeScript", "Pointer Events", "CSS"],
         github: "https://github.com/sefetekin/Portfolio",
         demo: "https://servetefetekin.vercel.app",

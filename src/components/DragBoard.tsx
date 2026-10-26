@@ -14,6 +14,12 @@ type Spot = { x: number; y: number }; // top-left of a pin, in board pixels
 type Spots = Record<string, Spot>;
 type Box = { x: number; y: number; w: number; h: number };
 type Size = { w: number; h: number; zone: number; pw: number; ph: number };
+// A pin is either resting in the cloth, pulled out or being pressed back in.
+type Phase = "out" | "in";
+
+const FLIGHT_MS = 420; // matches the left/top transition on .pin
+const PUSH_MS = 360;
+const MAX_HOLES = 60;
 
 type Drag = {
     id: string;
@@ -130,8 +136,12 @@ export default function DragBoard({
     const home = useRef<Spots>({});
     const openTimer = useRef<number | undefined>(undefined);
     const lastActive = useRef<string | null>(null);
+    const pushTimers = useRef<Record<string, number>>({});
+    const pulled = useRef(new Set<string>()); // pins currently out of the cloth
 
     const [spots, setSpots] = useState<Spots | null>(null);
+    const [phase, setPhase] = useState<Record<string, Phase>>({});
+    const [holes, setHoles] = useState<Spot[]>([]);
     const [dragging, setDragging] = useState<string | null>(null);
     const [hot, setHot] = useState(false);
 
@@ -149,18 +159,55 @@ export default function DragBoard({
         };
     }, [items]);
 
+    // Pulling a pin out leaves a puncture where its needle was.
+    const pullOut = useCallback(
+        (id: string, at: Spot) => {
+            const s = size();
+            if (!s) return;
+            window.clearTimeout(pushTimers.current[id]);
+            if (pulled.current.has(id)) return;
+            pulled.current.add(id);
+            const hole = { x: at.x + s.pw / 2, y: at.y + s.ph / 2 + 10 };
+            setHoles((prev) =>
+                prev.some((h) => Math.hypot(h.x - hole.x, h.y - hole.y) < 4)
+                    ? prev
+                    : [...prev, hole].slice(-MAX_HOLES),
+            );
+            setPhase((p) => ({ ...p, [id]: "out" }));
+        },
+        [size],
+    );
+
+    // Press the pin back into the cloth once it has landed.
+    const pushIn = useCallback((id: string, after: number) => {
+        window.clearTimeout(pushTimers.current[id]);
+        pushTimers.current[id] = window.setTimeout(() => {
+            pulled.current.delete(id);
+            setPhase((p) => ({ ...p, [id]: "in" }));
+            pushTimers.current[id] = window.setTimeout(() => {
+                setPhase((p) => {
+                    const next = { ...p };
+                    delete next[id];
+                    return next;
+                });
+            }, PUSH_MS);
+        }, after);
+    }, []);
+
     // Park a pin in the zone, remembering where it came from, then open it
     // once it has landed.
     const park = useCallback(
-        (id: string, from: Spot) => {
+        (id: string, from: Spot, pulled = false) => {
             const s = size();
             if (!s) return;
+            if (!pulled) pullOut(id, from);
+            pushIn(id, FLIGHT_MS);
             home.current[id] = from;
             setSpots((prev) => prev && { ...prev, [id]: zoneSpot(s) });
             window.clearTimeout(openTimer.current);
             openTimer.current = window.setTimeout(() => onOpen(id), 380);
         },
-        [size, onOpen],
+        [size, onOpen, pullOut, pushIn],
     );
 
     // First layout: scatter the pins. Runs again if the items change.
@@ -193,10 +240,16 @@ export default function DragBoard({
         lastActive.current = active;
         if (prev && prev !== active) {
             const back = home.current[prev];
-            if (back) setSpots((p) => p && { ...p, [prev]: back });
+            if (back) {
+                pullOut(prev, spots[prev]);
+                pushIn(prev, FLIGHT_MS);
+                setSpots((p) => p && { ...p, [prev]: back });
+            }
             window.setTimeout(() => pinRefs.current[prev]?.focus({ preventScroll: true }), 50);
         }
         if (active && !inZone(spots[active], s)) {
+            pullOut(active, spots[active]);
+            pushIn(active, FLIGHT_MS);
             home.current[active] = spots[active];
             setSpots((p) => p && { ...p, [active]: zoneSpot(s) });
         }
@@ -216,6 +269,7 @@ export default function DragBoard({
                 x: Math.min(Math.max(8, p.x * sx), s.w - s.zone - s.pw - 8),
                 y: Math.min(Math.max(8, p.y * sy), s.h - s.ph - 8),
             });
+            setHoles((prev) => prev.map((h) => ({ x: h.x * sx, y: h.y * sy })));
             setSpots((prev) => {
                 if (!prev) return prev;
                 const next: Spots = {};
@@ -231,7 +285,13 @@ export default function DragBoard({
         return () => window.removeEventListener("resize", onResize);
     }, [size]);
 
-    useEffect(() => () => window.clearTimeout(openTimer.current), []);
+    useEffect(
+        () => () => {
+            window.clearTimeout(openTimer.current);
+            Object.values(pushTimers.current).forEach((t) => window.clearTimeout(t));
+        },
+        [],
+    );
 
     const onPointerDown = (e: React.PointerEvent, id: string) => {
         if (!spots || e.button !== 0) return;
@@ -257,6 +317,7 @@ export default function DragBoard({
         if (!d.moved) {
             d.moved = true;
             setDragging(d.id);
+            pullOut(d.id, d.from);
         }
         // While a page is open only the zone strip is on screen, so the pin
         // may only peek out of it.
@@ -283,10 +344,16 @@ export default function DragBoard({
             return;
         }
         if (active) {
-            if (inZone(p, s)) setSpots({ ...spots, [d.id]: zoneSpot(s) });
-            else onClose();
+            if (inZone(p, s)) {
+                setSpots({ ...spots, [d.id]: zoneSpot(s) });
+                pushIn(d.id, FLIGHT_MS);
+            } else {
+                onClose(); // the pin flies home and is pushed in there
+            }
         } else if (inZone(p, s)) {
-            park(d.id, d.from);
+            park(d.id, d.from, true);
+        } else {
+            pushIn(d.id, 0);
         }
     };
 
@@ -299,6 +366,10 @@ export default function DragBoard({
             <div className="decor" inert={active ? true : undefined}>
                 {children}
             </div>
+
+            {holes.map((h, i) => (
+                <span key={i} className="hole" style={{ left: h.x, top: h.y }} aria-hidden />
+            ))}
 
             <div className={hot ? "zone hot" : "zone"} ref={zoneRef} aria-hidden>
                 <div className="zone-ring" />
@@ -313,6 +384,7 @@ export default function DragBoard({
                 const c = [pinClass];
                 if (dragging === item.id) c.push("dragging");
                 if (!spot) c.push("hidden");
+                if (phase[item.id]) c.push(phase[item.id]);
                 return (
                     <button
                         key={item.id}
