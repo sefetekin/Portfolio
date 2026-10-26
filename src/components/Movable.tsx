@@ -43,7 +43,6 @@ export default function Movable({
         const moved = start.current.moved;
         start.current = null;
         setLifted(false);
-        setHold(null);
         if (moved) setLayer(++topLayer);
     };
 
@@ -107,7 +106,7 @@ export default function Movable({
                         if (Math.hypot(dx, dy) < 4) return;
                         s.moved = true;
                         setLifted(true);
-                        // Keep its old spot open while it is in the air.
+                        // Keep its old spot open so the papers around it stay put.
                         if (s.inFlow) setHold({ w: s.from.w, h: s.from.h });
                     }
                     setTorn({ ...s.from, x: s.from.x + dx, y: s.from.y + dy });
