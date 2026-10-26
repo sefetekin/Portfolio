@@ -66,7 +66,9 @@ function Loose({
 }
 
 export default function DetailPins({ detail }: { detail: Detail }) {
-    const images = detail.images.length ? detail.images : [null, null];
+    const images = detail.images.length
+        ? detail.images
+        : Array.from({ length: detail.photoSlots ?? 2 }, () => null);
     const notes = noteStyles(detail.title, detail.points.length + 1);
     let i = 0;
     return (

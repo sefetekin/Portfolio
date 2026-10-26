@@ -9,6 +9,7 @@ export type BoardItem = {
     note: string;
     rot: number;
     badge?: string; // souvenir style, see .b-* in globals.css
+    image?: string; // a photo shown as the pin itself
 };
 
 type Spot = { x: number; y: number }; // top-left of a pin, in board pixels
@@ -428,6 +429,10 @@ export default function DragBoard({
                     >
                         <span className="tack" aria-hidden />
                         <span className="label">
+                            {item.image && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={item.image} alt="" draggable={false} />
+                            )}
                             {item.title}
                             {item.sub && <small>{item.sub}</small>}
                         </span>

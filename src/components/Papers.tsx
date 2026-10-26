@@ -2,6 +2,7 @@ import type { BoardItem } from "./DragBoard";
 import { noteStyles, type NoteStyle } from "./notes";
 import {
     certifications,
+    collection,
     education,
     internships,
     personalInfo,
@@ -18,7 +19,8 @@ export type SectionId =
     | "projects"
     | "skills"
     | "cv"
-    | "contact";
+    | "contact"
+    | "collection";
 
 export const sections: { id: SectionId; title: string; note: string }[] = [
     { id: "about", title: "About", note: "#fff3a8" },
@@ -28,13 +30,18 @@ export const sections: { id: SectionId; title: string; note: string }[] = [
     { id: "skills", title: "Skills", note: "#cfe3ff" },
     { id: "cv", title: "CV", note: "#ffffff" },
     { id: "contact", title: "Contact", note: "#f1d9ff" },
+    { id: "collection", title: "Collection", note: "#ffffff" },
 ];
 
 // Sections whose page is itself a board of pins rather than papers.
-export type BoardSectionId = "experience" | "research" | "contact" | "cv";
+export type BoardSectionId = "experience" | "research" | "contact" | "cv" | "collection";
 export type PaperSectionId = Exclude<SectionId, BoardSectionId>;
 export const isBoardSection = (id: SectionId): id is BoardSectionId =>
-    id === "experience" || id === "research" || id === "contact" || id === "cv";
+    id === "experience" ||
+    id === "research" ||
+    id === "contact" ||
+    id === "cv" ||
+    id === "collection";
 
 // On the Contact and CV boards, dropping a badge opens the link instead of a page.
 export const contactLinks: Record<string, string> = {
@@ -82,6 +89,15 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
         { id: "cv", title: "Download CV", note: "#ffffff", rot: 5, badge: "luggage" },
     ],
     cv: [{ id: "cv", title: "Download CV", note: "#ffffff", rot: -4, badge: "luggage" }],
+    collection: collection.map((b, i) => ({
+        id: b.id,
+        title: b.name,
+        sub: b.place,
+        note: "#ffffff",
+        rot: [-6, 5, -3, 7, -5, 3][i % 6],
+        badge: "collected",
+        image: b.image,
+    })),
 };
 
 export type Detail = {
@@ -90,11 +106,24 @@ export type Detail = {
     points: { text: string; meta?: string }[];
     tags: string[];
     images: string[];
+    photoSlots?: number; // placeholders to show while there are no images
 };
 
 // What a focused pin shows: its points and images, each as its own pin.
 export function detailFor(section: BoardSectionId, id: string): Detail | null {
     if (section === "contact" || section === "cv") return null;
+    if (section === "collection") {
+        const b = collection.find((x) => x.id === id);
+        if (!b) return null;
+        return {
+            title: b.name,
+            meta: b.year ? `${b.place} · ${b.year}` : b.place,
+            points: b.story ? [{ text: b.story }] : [],
+            tags: [],
+            images: b.photos.length ? b.photos : [],
+            photoSlots: 3,
+        };
+    }
     if (section === "experience") {
         const job = internships.find((j) => j.id === id);
         if (!job) return null;

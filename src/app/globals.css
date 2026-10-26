@@ -1379,3 +1379,114 @@ a {
         font-size: 14px;
     }
 }
+
+/* ---------- Collection ---------- */
+
+/* The way in: a navy passport with a gold globe and stitched edge. */
+.pin.b-passport .label {
+    padding: 0.55em 0.95em 0.4em 0.6em;
+    border-radius: 0.3em;
+    font-family: var(--font-display), serif;
+    font-size: 0.8em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #e7c46a;
+    background:
+        radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.5px) 0 0 / 5px 5px,
+        linear-gradient(170deg, #1d2f5c, #101c3c);
+    outline: 1px dashed rgba(231, 196, 106, 0.7);
+    outline-offset: -0.3em;
+    box-shadow: inset -0.25em 0 0 rgba(0, 0, 0, 0.25);
+}
+
+.pin.b-passport .label::before {
+    content: "";
+    flex: none;
+    width: 1.7em;
+    height: 1.7em;
+    margin-right: 0.5em;
+    border: 0.1em solid #e7c46a;
+    border-radius: 50%;
+    background:
+        linear-gradient(#e7c46a, #e7c46a) center / 100% 0.09em no-repeat,
+        linear-gradient(#e7c46a, #e7c46a) 50% 28% / 86% 0.07em no-repeat,
+        linear-gradient(#e7c46a, #e7c46a) 50% 72% / 86% 0.07em no-repeat,
+        linear-gradient(90deg, #e7c46a, #e7c46a) center / 0.09em 100% no-repeat,
+        radial-gradient(ellipse 46% 100% at center, transparent 84%, #e7c46a 88% 96%, transparent 100%);
+}
+
+.pin.b-passport .label::after {
+    content: "passport";
+    position: absolute;
+    top: 0.2em;
+    right: 0.9em;
+    font-size: 0.42em;
+    letter-spacing: 0.2em;
+    opacity: 0.8;
+}
+
+/* Collected badges: round pins showing a photo of the badge itself. */
+.pin.round {
+    width: 112px;
+    height: 112px;
+}
+
+.pin.round.badge {
+    font-size: 20px;
+}
+
+.pin.round.badge .label {
+    flex-direction: column;
+    gap: 0.2em;
+    font-family: var(--font-hand), cursive;
+    font-size: 1em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    color: var(--on-board);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.pin.round .label img {
+    display: block;
+    width: 5em;
+    height: 5em;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5));
+}
+
+/* Until there's a photo: a dashed outline where the badge will go. */
+.pin.b-collected:not(:has(img)) .label::before {
+    content: "badge\A photo soon";
+    white-space: pre;
+    display: grid;
+    place-items: center;
+    width: 8.4em;
+    height: 8.4em;
+    border: 2px dashed rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.55em;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--on-board-soft);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pin.round .label small {
+    margin-top: 0;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.5em;
+    font-weight: 400;
+    color: var(--on-board-soft);
+}
+
+@media (max-width: 640px) {
+    .pin.round {
+        width: 92px;
+        height: 92px;
+    }
+    .pin.round.badge {
+        font-size: 16px;
+    }
+}

@@ -239,6 +239,25 @@ export const education = [
     },
 ];
 
+// Badges collected on travels. Each one is a pin on the Collection board;
+// dropping it shows the photos from that trip. Paths are under public/.
+export interface CollectedBadge {
+    id: string;
+    name: string;
+    place: string;
+    year?: string;
+    image?: string; // a photo of the badge itself, ideally cut out
+    photos: string[]; // trip pictures; placeholders are shown until set
+    story?: string;
+}
+
+export const collection: CollectedBadge[] = [
+    { id: "badge-1", name: "Badge one", place: "Somewhere in the world", photos: [] },
+    { id: "badge-2", name: "Badge two", place: "Somewhere in the world", photos: [] },
+    { id: "badge-3", name: "Badge three", place: "Somewhere in the world", photos: [] },
+    { id: "badge-4", name: "Badge four", place: "Somewhere in the world", photos: [] },
+];
+
 export const personalInfo = {
     name: "Servet Efe Tekin",
     tagline: "MSc AI & ML @ Imperial • Software Engineer",

@@ -24,6 +24,7 @@ const angles: Record<SectionId, number> = {
     skills: 7,
     cv: -8,
     contact: 3,
+    collection: -5,
 };
 
 // Every pin is a different souvenir badge, as if collected on travels.
@@ -35,6 +36,7 @@ const badges: Record<SectionId, string> = {
     skills: "nazar",
     cv: "plaque",
     contact: "patch",
+    collection: "passport",
 };
 
 const mainItems: BoardItem[] = sections.map((s) => ({
@@ -52,6 +54,7 @@ const boardHint: Record<string, string> = {
     research: "drop a project",
     contact: "drop a badge",
     cv: "drop the badge",
+    collection: "drop a badge",
 };
 
 // Boards whose badges open a link or a download rather than a page.
@@ -191,13 +194,17 @@ export default function PinBoard() {
                             onOpen={isLinkBoard(shown) ? openLink : openItem}
                             onClose={isLinkBoard(shown) ? closeLink : closeItem}
                             className="sub"
-                            pinClass={isLinkBoard(shown) ? "pin" : "pin wide"}
+                            pinClass={
+                                shown === "collection" ? "pin round" : isLinkBoard(shown) ? "pin" : "pin wide"
+                            }
                             zoneLabel={
                                 shown === "cv"
                                     ? "pin here to download"
                                     : shown === "contact"
                                       ? "pin here to open"
-                                      : "pin here to focus"
+                                      : shown === "collection"
+                                        ? "pin here for photos"
+                                        : "pin here to focus"
                             }
                             zoneBack="pull it out to go back"
                         >
