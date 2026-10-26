@@ -14,7 +14,9 @@ export type BoardItem = {
 type Spot = { x: number; y: number }; // top-left of a pin, in board pixels
 type Spots = Record<string, Spot>;
 type Box = { x: number; y: number; w: number; h: number };
-type Size = { w: number; h: number; zone: number; pw: number; ph: number };
+// `v` is the phone layout: the drop zone is a strip along the bottom
+// instead of the right, and the pages stack downwards.
+type Size = { w: number; h: number; zone: number; pw: number; ph: number; v: boolean };
 // A pin is either resting in the cloth, pulled out or being pressed back in.
 type Phase = "out" | "in";
 
@@ -42,15 +44,19 @@ const shuffle = <T,>(a: T[]) => {
     return a;
 };
 
+// The part of the board outside the drop zone.
+const openW = (s: Size) => (s.v ? s.w : s.w - s.zone);
+const openH = (s: Size) => (s.v ? s.h - s.zone : s.h);
+
 // Scatter pins over the open part of the board, keeping clear of the
 // decorations, the drop zone and each other. Pure random placement is
 // tried first; on a cramped screen it falls back to a jittered grid.
 function scatter(ids: string[], s: Size, keepOut: Box[]): Spots {
     const pad = 14;
     const minX = 16;
-    const maxX = Math.max(minX, s.w - s.zone - s.pw - 16);
+    const maxX = Math.max(minX, openW(s) - s.pw - 16);
     const minY = 20;
-    const maxY = Math.max(minY, s.h - s.ph - 20);
+    const maxY = Math.max(minY, openH(s) - s.ph - 20);
     const clear = (b: Box, placed: Box[]) =>
         !placed.some((p) => overlaps(b, p)) && !keepOut.some((r) => overlaps(b, r));
 
@@ -74,7 +80,7 @@ function scatter(ids: string[], s: Size, keepOut: Box[]): Spots {
     }
 
     const top = Math.max(minY, ...keepOut.filter((r) => r.y < s.h / 2).map((r) => r.y + r.h + 8));
-    const bottom = Math.min(s.h - 20, ...keepOut.filter((r) => r.y >= s.h / 2).map((r) => r.y - 8));
+    const bottom = Math.min(openH(s) - 20, ...keepOut.filter((r) => r.y >= s.h / 2).map((r) => r.y - 8));
     const cols = Math.max(1, Math.floor((maxX + s.pw - minX) / (s.pw + pad)));
     const rows = Math.max(1, Math.ceil(ids.length / cols));
     const cw = (maxX + s.pw - minX) / cols;
@@ -93,12 +99,13 @@ function scatter(ids: string[], s: Size, keepOut: Box[]): Spots {
     return out;
 }
 
-const zoneSpot = (s: Size): Spot => ({
-    x: s.w - s.zone / 2 - s.pw / 2,
-    y: s.h / 2 - s.ph / 2,
-});
+const zoneSpot = (s: Size): Spot =>
+    s.v
+        ? { x: s.w / 2 - s.pw / 2, y: s.h - s.zone / 2 - s.ph / 2 }
+        : { x: s.w - s.zone / 2 - s.pw / 2, y: s.h / 2 - s.ph / 2 };
 
-const inZone = (p: Spot, s: Size) => p.x + s.pw / 2 > s.w - s.zone;
+const inZone = (p: Spot, s: Size) =>
+    s.v ? p.y + s.ph / 2 > s.h - s.zone : p.x + s.pw / 2 > s.w - s.zone;
 
 /**
  * A cork board of draggable pins with a drop zone on its right. Dropping or
@@ -151,12 +158,14 @@ export default function DragBoard({
         const zone = zoneRef.current;
         const pin = items[0] && pinRefs.current[items[0].id];
         if (!board || !zone || !pin) return null;
+        const v = zone.offsetWidth >= board.clientWidth - 1;
         return {
             w: board.clientWidth,
             h: board.clientHeight,
-            zone: zone.offsetWidth,
+            zone: v ? zone.offsetHeight : zone.offsetWidth,
             pw: pin.offsetWidth,
             ph: pin.offsetHeight,
+            v,
         };
     }, [items]);
 
@@ -267,8 +276,8 @@ export default function DragBoard({
             const sx = s.w / was.w;
             const sy = s.h / was.h;
             const fit = (p: Spot): Spot => ({
-                x: Math.min(Math.max(8, p.x * sx), s.w - s.zone - s.pw - 8),
-                y: Math.min(Math.max(8, p.y * sy), s.h - s.ph - 8),
+                x: Math.min(Math.max(8, p.x * sx), openW(s) - s.pw - 8),
+                y: Math.min(Math.max(8, p.y * sy), openH(s) - s.ph - 8),
             });
             setHoles((prev) => prev.map((h) => ({ x: h.x * sx, y: h.y * sy })));
             setSpots((prev) => {
@@ -322,9 +331,10 @@ export default function DragBoard({
         }
         // While a page is open only the zone strip is on screen, so the pin
         // may only peek out of it.
-        const minX = active ? s.w - s.zone - s.pw * 0.75 : 0;
+        const minX = active && !s.v ? s.w - s.zone - s.pw * 0.75 : 0;
+        const minY = active && s.v ? s.h - s.zone - s.ph * 0.75 : 0;
         const x = Math.min(Math.max(minX, d.from.x + dx), s.w - s.pw);
-        const y = Math.min(Math.max(0, d.from.y + dy), s.h - s.ph);
+        const y = Math.min(Math.max(minY, d.from.y + dy), s.h - s.ph);
         setSpots({ ...spots, [d.id]: { x, y } });
         setHot(inZone({ x, y }, s));
     };

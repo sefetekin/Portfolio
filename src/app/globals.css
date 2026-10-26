@@ -91,6 +91,7 @@ a {
     inset: 0 auto 0 0;
     width: max-content;
     display: flex;
+    transform: translateX(calc(var(--depth, 0) * -1 * (100vw - var(--zone))));
     transition: transform var(--slide);
     will-change: transform;
 }
@@ -1245,4 +1246,107 @@ a {
     border-radius: 50%;
     color: #ffd23f;
     background: #1b1b1b;
+}
+
+/* ---------- phones: the board flows downwards ---------- */
+
+.on-narrow {
+    display: none;
+}
+
+/* The drop zone becomes a strip along the bottom. Dropping a pin there
+   slides the board up, so the pin sits in a strip at the top and the page
+   fills the rest of the screen. */
+@media (max-width: 640px) {
+    :root {
+        --zone: 124px;
+        --pin-w: 116px;
+        --pin-h: 60px;
+        --screen: 100dvh;
+    }
+
+    .track {
+        inset: 0 0 auto 0;
+        width: 100vw;
+        flex-direction: column;
+        transform: translateY(calc(var(--depth, 0) * -1 * (var(--screen) - var(--zone))));
+    }
+
+    .board {
+        height: var(--screen);
+    }
+
+    .board.sub {
+        height: 100%;
+    }
+
+    .level {
+        width: 100vw;
+        height: calc(var(--screen) - var(--zone));
+        border-left: 0;
+        border-top: 2px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .zone {
+        top: auto;
+        left: 0;
+        width: auto;
+        height: var(--zone);
+        gap: 6px;
+        border-left: 0;
+        border-top: 2px dashed rgba(255, 255, 255, 0.35);
+    }
+
+    .zone-ring {
+        width: calc(var(--pin-w) + 40px);
+        height: calc(var(--pin-h) + 16px);
+    }
+
+    .on-wide {
+        display: none;
+    }
+    .on-narrow {
+        display: inline;
+    }
+
+    /* Beside the parked pin rather than under it. */
+    .zone-back {
+        top: 50%;
+        bottom: auto;
+        left: auto;
+        right: 18px;
+        width: calc(50vw - 104px);
+        line-height: 1.05;
+        padding: 0;
+        font-size: 14px;
+        text-align: right;
+        transform: translateY(-50%);
+    }
+
+    .nameplate {
+        max-width: calc(100vw - 56px);
+    }
+
+    .hint {
+        bottom: calc(var(--zone) + 14px);
+    }
+
+    .panel-head.floating {
+        right: 14px;
+    }
+
+    .pin.wide {
+        width: 168px;
+        height: 96px;
+    }
+
+    .paper.contact-note {
+        bottom: calc(var(--zone) + 52px);
+        width: min(280px, calc(100% - 28px));
+        left: 14px;
+    }
+
+    .contact-note a {
+        font-size: 14px;
+    }
 }

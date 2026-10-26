@@ -47,10 +47,20 @@ const mainItems: BoardItem[] = sections.map((s) => ({
 const isSection = (v: string): v is SectionId => sections.some((s) => s.id === v);
 
 const boardHint: Record<string, string> = {
-    experience: "drop a role on the right →",
-    research: "drop a project on the right →",
-    contact: "drop a badge on the right to open it →",
+    experience: "drop a role",
+    research: "drop a project",
+    contact: "drop a badge",
 };
+
+// Phones drop pins at the bottom, wider screens on the right.
+function Where() {
+    return (
+        <>
+            <span className="on-wide"> on the right →</span>
+            <span className="on-narrow"> at the bottom ↓</span>
+        </>
+    );
+}
 
 export default function PinBoard() {
     // What is open at each level of the board, and what each panel shows.
@@ -141,7 +151,7 @@ export default function PinBoard() {
         <main className="viewport">
             <div
                 className="track cork"
-                style={{ transform: `translateX(calc(${-depth} * (100vw - var(--zone))))` }}
+                style={{ "--depth": depth } as React.CSSProperties}
             >
                 <DragBoard
                     items={mainItems}
@@ -158,7 +168,8 @@ export default function PinBoard() {
                         <p>{personalInfo.tagline}</p>
                     </header>
                     <p className="hint" data-keepout>
-                        grab a pin, drop it on the right →
+                        grab a pin, drop it
+                        <Where />
                     </p>
                 </DragBoard>
 
@@ -203,6 +214,7 @@ export default function PinBoard() {
                             )}
                             <p className="hint" data-keepout>
                                 {boardHint[shown]}
+                                <Where />
                             </p>
                         </DragBoard>
                     </section>
