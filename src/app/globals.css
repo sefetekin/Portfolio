@@ -362,13 +362,13 @@ a {
     box-shadow: 0 10px 18px rgba(40, 20, 5, 0.32);
     transform: rotate(var(--rot, 0deg));
     font-size: 15px;
-    line-height: 28px;
+    line-height: 38px;
 }
 
 .paper h3 {
     margin: 0;
     font-size: 18px;
-    line-height: 28px;
+    line-height: 38px;
 }
 
 .paper .meta {
@@ -650,4 +650,108 @@ a {
 
 .loose.note .chip {
     border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ---------- needles and punctures ---------- */
+
+/* The needle hides in the cloth while a pin rests. It slides out when the
+   pin is pulled, shows while it is held, and slides back in on landing. */
+.needle {
+    position: absolute;
+    top: calc(50% + 8px);
+    left: 50%;
+    z-index: -1;
+    width: 3px;
+    height: 0;
+    margin-left: -1.5px;
+    border-radius: 0 0 2px 2px;
+    background: linear-gradient(90deg, #4d5258 0%, #f3f4f6 40%, #a3a9b0 70%, #5a5f66 100%);
+}
+
+.pin.out .needle,
+.pin.dragging .needle {
+    height: 38px;
+    animation: needle-out 0.28s ease-out;
+}
+
+.pin.in .needle {
+    animation: needle-in 0.36s ease-in forwards;
+}
+
+.pin.in {
+    animation: pin-press 0.36s ease-out;
+}
+
+/* A dark dot where the needle meets the cloth while it goes in. */
+.pin.in .needle::after {
+    content: "";
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    width: 10px;
+    height: 5px;
+    margin-left: -5px;
+    border-radius: 50%;
+    background: radial-gradient(rgba(10, 0, 3, 0.85), transparent 70%);
+}
+
+@keyframes needle-out {
+    from {
+        height: 0;
+    }
+    to {
+        height: 38px;
+    }
+}
+
+@keyframes needle-in {
+    from {
+        height: 38px;
+    }
+    to {
+        height: 0;
+    }
+}
+
+@keyframes pin-press {
+    0% {
+        transform: rotate(var(--rot, 0deg)) scale(1.08) translateY(-6px);
+    }
+    70% {
+        transform: rotate(var(--rot, 0deg)) scale(0.97) translateY(1px);
+    }
+    100% {
+        transform: rotate(var(--rot, 0deg)) scale(1);
+    }
+}
+
+/* Punctures left in the weave by pins that have been moved. */
+.hole {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle, rgba(8, 0, 2, 0.95) 0 22%, rgba(8, 0, 2, 0.45) 38%, transparent 52%),
+        radial-gradient(circle, transparent 45%, rgba(255, 210, 215, 0.12) 55%, transparent 72%);
+    pointer-events: none;
+    animation: hole-open 0.25s ease-out;
+}
+
+@keyframes hole-open {
+    from {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pin.out .needle,
+    .pin.dragging .needle,
+    .pin.in .needle,
+    .pin.in,
+    .hole {
+        animation: none;
+    }
 }
