@@ -5,8 +5,10 @@ import { personalInfo } from "@/data/portfolio";
 import DragBoard, { type BoardItem } from "./DragBoard";
 import DetailPins from "./Detail";
 import {
+    CVSheet,
     SectionPapers,
     boardItems,
+    contactLinks,
     detailFor,
     isBoardSection,
     sections,
@@ -45,7 +47,25 @@ const mainItems: BoardItem[] = sections.map((s) => ({
 
 const isSection = (v: string): v is SectionId => sections.some((s) => s.id === v);
 
-const itemNoun: Record<string, string> = { experience: "role", research: "project" };
+const boardHint: Record<string, string> = {
+    experience: "drop a role",
+    research: "drop a project",
+    contact: "drop a badge",
+    cv: "drop the badge",
+};
+
+// Boards whose badges open a link or a download rather than a page.
+const isLinkBoard = (id: SectionId) => id === "contact" || id === "cv";
+
+// Phones drop pins at the bottom, wider screens on the right.
+function Where() {
+    return (
+        <>
+            <span className="on-wide"> on the right →</span>
+            <span className="on-narrow"> at the bottom ↓</span>
+        </>
+    );
+}
 
 export default function PinBoard() {
     // What is open at each level of the board, and what each panel shows.
@@ -54,6 +74,7 @@ export default function PinBoard() {
     const [item, setItem] = useState<string | null>(null);
     const [shown, setShown] = useState<SectionId>("about");
     const [shownItem, setShownItem] = useState<string | null>(null);
+    const [link, setLink] = useState<string | null>(null); // contact badge in the zone
     const sectionHeading = useRef<HTMLHeadingElement>(null);
     const itemHeading = useRef<HTMLHeadingElement>(null);
 
@@ -96,6 +117,28 @@ export default function PinBoard() {
     }, []);
     const closeItem = useCallback(() => setItem(null), []);
 
+    // A contact badge opens its link, then goes back to its spot.
+    const linkTimer = useRef<number | undefined>(undefined);
+    const openLink = useCallback((id: string) => {
+        const href = contactLinks[id];
+        if (!href) return;
+        setLink(id);
+        if (id === "cv") {
+            const a = document.createElement("a");
+            a.href = href;
+            a.download = "";
+            a.click();
+        } else if (href.startsWith("mailto:")) location.href = href;
+        else window.open(href, "_blank", "noopener,noreferrer");
+        window.clearTimeout(linkTimer.current);
+        linkTimer.current = window.setTimeout(() => setLink(null), 1200);
+    }, []);
+    const closeLink = useCallback(() => {
+        window.clearTimeout(linkTimer.current);
+        setLink(null);
+    }, []);
+    useEffect(() => () => window.clearTimeout(linkTimer.current), []);
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key !== "Escape") return;
@@ -113,7 +156,7 @@ export default function PinBoard() {
         <main className="viewport">
             <div
                 className="track cork"
-                style={{ transform: `translateX(calc(${-depth} * (100vw - var(--zone))))` }}
+                style={{ "--depth": depth } as React.CSSProperties}
             >
                 <DragBoard
                     items={mainItems}
@@ -130,7 +173,8 @@ export default function PinBoard() {
                         <p>{personalInfo.tagline}</p>
                     </header>
                     <p className="hint" data-keepout>
-                        grab a pin, drop it on the right →
+                        grab a pin, drop it
+                        <Where />
                     </p>
                 </DragBoard>
 
@@ -143,12 +187,18 @@ export default function PinBoard() {
                         <DragBoard
                             key={shown}
                             items={boardItems[shown]}
-                            active={item}
-                            onOpen={openItem}
-                            onClose={closeItem}
+                            active={isLinkBoard(shown) ? link : item}
+                            onOpen={isLinkBoard(shown) ? openLink : openItem}
+                            onClose={isLinkBoard(shown) ? closeLink : closeItem}
                             className="sub"
-                            pinClass="pin wide"
-                            zoneLabel="pin here to focus"
+                            pinClass={isLinkBoard(shown) ? "pin" : "pin wide"}
+                            zoneLabel={
+                                shown === "cv"
+                                    ? "pin here to download"
+                                    : shown === "contact"
+                                      ? "pin here to open"
+                                      : "pin here to focus"
+                            }
                             zoneBack="pull it out to go back"
                         >
                             <div className="panel-head floating" data-keepout>
@@ -159,8 +209,24 @@ export default function PinBoard() {
                                     ← back to the board
                                 </button>
                             </div>
+                            {shown === "contact" && (
+                                <div
+                                    className="paper note note-sticky contact-note"
+                                    style={{ "--note": "#ffbf6b", "--rot": "-3deg" } as React.CSSProperties}
+                                    data-keepout
+                                >
+                                    <span className="tack" aria-hidden />
+                                    <h3>Say hello</h3>
+                                    <p>
+                                        <a href={contactLinks.email}>{personalInfo.email}</a>
+                                    </p>
+                                    <p className="meta">{personalInfo.location}</p>
+                                </div>
+                            )}
+                            {shown === "cv" && <CVSheet />}
                             <p className="hint" data-keepout>
-                                drop a {itemNoun[shown]} on the right →
+                                {boardHint[shown]}
+                                <Where />
                             </p>
                         </DragBoard>
                     </section>
@@ -178,7 +244,7 @@ export default function PinBoard() {
                                 ← back to the board
                             </button>
                         </div>
-                        <div className={shown === "cv" ? "papers single" : "papers"}>
+                        <div className="papers">
                             <SectionPapers id={shown} />
                         </div>
                     </section>

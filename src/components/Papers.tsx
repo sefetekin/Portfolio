@@ -1,4 +1,5 @@
 import type { BoardItem } from "./DragBoard";
+import { noteStyles, type NoteStyle } from "./notes";
 import {
     certifications,
     education,
@@ -30,10 +31,18 @@ export const sections: { id: SectionId; title: string; note: string }[] = [
 ];
 
 // Sections whose page is itself a board of pins rather than papers.
-export type BoardSectionId = "experience" | "research";
+export type BoardSectionId = "experience" | "research" | "contact" | "cv";
 export type PaperSectionId = Exclude<SectionId, BoardSectionId>;
 export const isBoardSection = (id: SectionId): id is BoardSectionId =>
-    id === "experience" || id === "research";
+    id === "experience" || id === "research" || id === "contact" || id === "cv";
+
+// On the Contact and CV boards, dropping a badge opens the link instead of a page.
+export const contactLinks: Record<string, string> = {
+    github: personalInfo.github,
+    linkedin: personalInfo.linkedin,
+    email: `mailto:${personalInfo.email}`,
+    cv: personalInfo.cv, // downloaded rather than opened
+};
 
 const noteColors = ["#fff3a8", "#ffd6c9", "#cdeccd", "#cfe3ff", "#f1d9ff", "#ffe2a8"];
 // Souvenirs with room for a title and a subtitle.
@@ -66,6 +75,13 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
             badge: "ticket",
         },
     ],
+    contact: [
+        { id: "github", title: "GitHub", note: "#ffffff", rot: -5, badge: "subway" },
+        { id: "linkedin", title: "LinkedIn", note: "#ffffff", rot: 4, badge: "ubahn" },
+        { id: "email", title: "Email", note: "#ffffff", rot: -3, badge: "airmail" },
+        { id: "cv", title: "Download CV", note: "#ffffff", rot: 5, badge: "luggage" },
+    ],
+    cv: [{ id: "cv", title: "Download CV", note: "#ffffff", rot: -4, badge: "luggage" }],
 };
 
 export type Detail = {
@@ -78,6 +94,7 @@ export type Detail = {
 
 // What a focused pin shows: its points and images, each as its own pin.
 export function detailFor(section: BoardSectionId, id: string): Detail | null {
+    if (section === "contact" || section === "cv") return null;
     if (section === "experience") {
         const job = internships.find((j) => j.id === id);
         if (!job) return null;
@@ -115,16 +132,21 @@ const tilt = (i: number) => `${(((i * 37) % 5) - 2) * 0.5}deg`;
 function Paper({
     i,
     wide,
+    note,
     children,
 }: {
     i: number;
     wide?: boolean;
+    note?: NoteStyle;
     children: React.ReactNode;
 }) {
+    const cls = ["paper"];
+    if (wide) cls.push("wide");
+    if (note) cls.push("note", note.className);
     return (
         <article
-            className={wide ? "paper wide" : "paper"}
-            style={{ "--rot": tilt(i) } as React.CSSProperties}
+            className={cls.join(" ")}
+            style={{ ...note?.style, "--rot": tilt(i) } as React.CSSProperties}
         >
             <span className="tack" aria-hidden />
             {children}
@@ -145,13 +167,14 @@ function Chips({ items }: { items: string[] }) {
 }
 
 function About() {
+    const notes = noteStyles("about", 3);
     return (
         <>
-            <Paper i={0}>
+            <Paper i={0} note={notes[0]}>
                 <h3>Hi, I&apos;m Efe.</h3>
                 <p>{personalInfo.about}</p>
             </Paper>
-            <Paper i={1}>
+            <Paper i={1} note={notes[1]}>
                 <h3>Education</h3>
                 {education.map((e) => (
                     <div key={e.school}>
@@ -165,7 +188,7 @@ function About() {
                 ))}
                 <p className="meta">Based in {personalInfo.location}</p>
             </Paper>
-            <Paper i={2}>
+            <Paper i={2} note={notes[2]}>
                 <h3>Fun fact</h3>
                 <p>{personalInfo.funFact}</p>
             </Paper>
@@ -174,10 +197,11 @@ function About() {
 }
 
 function Projects() {
+    const notes = noteStyles("projects", projects.length);
     return (
         <>
             {projects.map((p, i) => (
-                <Paper key={p.id} i={i}>
+                <Paper key={p.id} i={i} note={notes[i]}>
                     {p.badge && <span className="badge">{p.badge}</span>}
                     <h3>{p.name}</h3>
                     <p>{p.description}</p>
@@ -209,10 +233,11 @@ function Skills() {
         "Tools",
         "Concepts",
     ];
+    const notes = noteStyles("skills", categories.length);
     return (
         <>
             {categories.map((c, i) => (
-                <Paper key={c} i={i}>
+                <Paper key={c} i={i} note={notes[i]}>
                     <h3>{c}</h3>
                     <Chips
                         items={skills
@@ -225,14 +250,13 @@ function Skills() {
     );
 }
 
-function CV() {
+// The CV pinned up beside the Download CV badge on the CV board.
+export function CVSheet() {
     return (
-        <Paper i={1} wide>
+        <article className="paper cv-sheet" style={{ "--rot": "-0.5deg" } as React.CSSProperties} data-keepout>
+            <span className="tack" aria-hidden />
             <h3>Curriculum Vitae</h3>
             <p className="meta">One page, PDF, updated for 2026-27</p>
-            <a className="big-link" href={personalInfo.cv} download>
-                Download CV
-            </a>
             <object
                 className="cv-frame"
                 data={personalInfo.cv}
@@ -244,33 +268,7 @@ function CV() {
                     <a href={personalInfo.cv}>Open the CV</a> instead.
                 </p>
             </object>
-        </Paper>
-    );
-}
-
-function Contact() {
-    return (
-        <>
-            <Paper i={0}>
-                <h3>Say hello</h3>
-                <p>The quickest way to reach me is email.</p>
-                <a className="big-link" href={`mailto:${personalInfo.email}`}>
-                    {personalInfo.email}
-                </a>
-            </Paper>
-            <Paper i={1}>
-                <h3>Elsewhere</h3>
-                <div className="links">
-                    <a href={personalInfo.github} target="_blank" rel="noreferrer">
-                        GitHub ↗
-                    </a>
-                    <a href={personalInfo.linkedin} target="_blank" rel="noreferrer">
-                        LinkedIn ↗
-                    </a>
-                </div>
-                <p className="meta">{personalInfo.location}</p>
-            </Paper>
-        </>
+        </article>
     );
 }
 
@@ -282,9 +280,5 @@ export function SectionPapers({ id }: { id: PaperSectionId }) {
             return <Projects />;
         case "skills":
             return <Skills />;
-        case "cv":
-            return <CV />;
-        case "contact":
-            return <Contact />;
     }
 }

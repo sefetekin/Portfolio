@@ -1,12 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { noteStyles } from "./notes";
 import type { Detail } from "./Papers";
 
-// Bullet points are pinned up on a mix of papers, and the sticky notes
-// come in a different colour each time.
-const papers = ["sticky", "index", "sticky", "torn", "sticky", "grid"];
-const stickies = ["#fff27a", "#ff9fc4", "#a6f0b5", "#8fd4ff", "#ffbf6b", "#d7b8ff"];
 const tilt = (i: number) => ((i * 47) % 7) - 3;
 let topLayer = 1; // the last pin moved stays on top
 
@@ -70,6 +67,7 @@ function Loose({
 
 export default function DetailPins({ detail }: { detail: Detail }) {
     const images = detail.images.length ? detail.images : [null, null];
+    const notes = noteStyles(detail.title, detail.points.length + 1);
     let i = 0;
     return (
         <div className="loose-pins">
@@ -77,8 +75,8 @@ export default function DetailPins({ detail }: { detail: Detail }) {
                 <Loose
                     key={p.text}
                     i={i++}
-                    className={`loose note ${papers[n % papers.length]}`}
-                    style={{ "--note": stickies[n % stickies.length] } as React.CSSProperties}
+                    className={`loose note ${notes[n].className}`}
+                    style={notes[n].style}
                 >
                     <p>{p.text}</p>
                     {p.meta && <p className="meta">{p.meta}</p>}
@@ -105,7 +103,11 @@ export default function DetailPins({ detail }: { detail: Detail }) {
                 </Loose>
             ))}
             {detail.tags.length > 0 && (
-                <Loose i={i++} className="loose note kraft tags">
+                <Loose
+                    i={i++}
+                    className={`loose note tags ${notes[detail.points.length].className}`}
+                    style={notes[detail.points.length].style}
+                >
                     <p className="meta">Tools</p>
                     <div className="chips">
                         {detail.tags.map((t) => (
