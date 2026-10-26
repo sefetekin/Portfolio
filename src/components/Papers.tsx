@@ -31,10 +31,17 @@ export const sections: { id: SectionId; title: string; note: string }[] = [
 ];
 
 // Sections whose page is itself a board of pins rather than papers.
-export type BoardSectionId = "experience" | "research";
+export type BoardSectionId = "experience" | "research" | "contact";
 export type PaperSectionId = Exclude<SectionId, BoardSectionId>;
 export const isBoardSection = (id: SectionId): id is BoardSectionId =>
-    id === "experience" || id === "research";
+    id === "experience" || id === "research" || id === "contact";
+
+// On the Contact board, dropping a badge opens the link instead of a page.
+export const contactLinks: Record<string, string> = {
+    github: personalInfo.github,
+    linkedin: personalInfo.linkedin,
+    email: `mailto:${personalInfo.email}`,
+};
 
 const noteColors = ["#fff3a8", "#ffd6c9", "#cdeccd", "#cfe3ff", "#f1d9ff", "#ffe2a8"];
 // Souvenirs with room for a title and a subtitle.
@@ -67,6 +74,11 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
             badge: "ticket",
         },
     ],
+    contact: [
+        { id: "github", title: "GitHub", note: "#ffffff", rot: -5, badge: "subway" },
+        { id: "linkedin", title: "LinkedIn", note: "#ffffff", rot: 4, badge: "ubahn" },
+        { id: "email", title: "Email", note: "#ffffff", rot: -3, badge: "airmail" },
+    ],
 };
 
 export type Detail = {
@@ -79,6 +91,7 @@ export type Detail = {
 
 // What a focused pin shows: its points and images, each as its own pin.
 export function detailFor(section: BoardSectionId, id: string): Detail | null {
+    if (section === "contact") return null;
     if (section === "experience") {
         const job = internships.find((j) => j.id === id);
         if (!job) return null;
@@ -257,33 +270,6 @@ function CV() {
     );
 }
 
-function Contact() {
-    const notes = noteStyles("contact", 2);
-    return (
-        <>
-            <Paper i={0} note={notes[0]}>
-                <h3>Say hello</h3>
-                <p>The quickest way to reach me is email.</p>
-                <a className="big-link" href={`mailto:${personalInfo.email}`}>
-                    {personalInfo.email}
-                </a>
-            </Paper>
-            <Paper i={1} note={notes[1]}>
-                <h3>Elsewhere</h3>
-                <div className="links">
-                    <a href={personalInfo.github} target="_blank" rel="noreferrer">
-                        GitHub ↗
-                    </a>
-                    <a href={personalInfo.linkedin} target="_blank" rel="noreferrer">
-                        LinkedIn ↗
-                    </a>
-                </div>
-                <p className="meta">{personalInfo.location}</p>
-            </Paper>
-        </>
-    );
-}
-
 export function SectionPapers({ id }: { id: PaperSectionId }) {
     switch (id) {
         case "about":
@@ -294,7 +280,5 @@ export function SectionPapers({ id }: { id: PaperSectionId }) {
             return <Skills />;
         case "cv":
             return <CV />;
-        case "contact":
-            return <Contact />;
     }
 }
