@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Inter } from "next/font/google";
+import { Caveat, Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 
 const body = Inter({
@@ -15,6 +15,12 @@ const hand = Caveat({
 
 const description =
     "Servet Efe Tekin: MSc AI & ML student at Imperial College London and software engineer. Drag a pin across the board to read about my experience, research, projects and CV.";
+
+const display = Cinzel({
+    subsets: ["latin"],
+    weight: ["700"],
+    variable: "--font-display",
+});
 
 export const metadata: Metadata = {
     title: "Servet Efe Tekin",
@@ -42,7 +48,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${body.variable} ${hand.variable}`}>
+            <body className={`${body.variable} ${hand.variable} ${display.variable}`}>
                 {children}
             </body>
         </html>

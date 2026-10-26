@@ -3,7 +3,10 @@
 import { useRef, useState } from "react";
 import type { Detail } from "./Papers";
 
-const colors = ["#fff3a8", "#ffd6c9", "#cdeccd", "#cfe3ff", "#f1d9ff", "#ffe2a8"];
+// Bullet points are pinned up on a mix of papers, and the sticky notes
+// come in a different colour each time.
+const papers = ["sticky", "index", "sticky", "torn", "sticky", "grid"];
+const stickies = ["#fff27a", "#ff9fc4", "#a6f0b5", "#8fd4ff", "#ffbf6b", "#d7b8ff"];
 const tilt = (i: number) => ((i * 47) % 7) - 3;
 let topLayer = 1; // the last pin moved stays on top
 
@@ -70,12 +73,12 @@ export default function DetailPins({ detail }: { detail: Detail }) {
     let i = 0;
     return (
         <div className="loose-pins">
-            {detail.points.map((p) => (
+            {detail.points.map((p, n) => (
                 <Loose
                     key={p.text}
                     i={i++}
-                    className="loose note"
-                    style={{ "--note": colors[i % colors.length] } as React.CSSProperties}
+                    className={`loose note ${papers[n % papers.length]}`}
+                    style={{ "--note": stickies[n % stickies.length] } as React.CSSProperties}
                 >
                     <p>{p.text}</p>
                     {p.meta && <p className="meta">{p.meta}</p>}
@@ -102,7 +105,7 @@ export default function DetailPins({ detail }: { detail: Detail }) {
                 </Loose>
             ))}
             {detail.tags.length > 0 && (
-                <Loose i={i++} className="loose note tags" style={{ "--note": "#ffffff" } as React.CSSProperties}>
+                <Loose i={i++} className="loose note kraft tags">
                     <p className="meta">Tools</p>
                     <div className="chips">
                         {detail.tags.map((t) => (

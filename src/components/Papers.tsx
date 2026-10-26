@@ -36,6 +36,8 @@ export const isBoardSection = (id: SectionId): id is BoardSectionId =>
     id === "experience" || id === "research";
 
 const noteColors = ["#fff3a8", "#ffd6c9", "#cdeccd", "#cfe3ff", "#f1d9ff", "#ffe2a8"];
+// Souvenirs with room for a title and a subtitle.
+const wideBadges = ["ticket", "stamp", "tag", "plaque"];
 
 export const boardItems: Record<BoardSectionId, BoardItem[]> = {
     experience: internships.map((job, i) => ({
@@ -44,6 +46,7 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
         sub: `${job.company} · ${job.dates.slice(-4)}`,
         note: noteColors[i % noteColors.length],
         rot: [-5, 4, -2, 6, -6][i % 5],
+        badge: wideBadges[i % wideBadges.length],
     })),
     research: [
         ...research.map((r, i) => ({
@@ -52,8 +55,16 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
             sub: r.dates.slice(-4),
             note: noteColors[(i + 2) % noteColors.length],
             rot: [4, -5, 3, -3][i % 4],
+            badge: wideBadges[(i + 1) % wideBadges.length],
         })),
-        { id: "certifications", title: "Certifications", sub: "& courses", note: "#ffffff", rot: -4 },
+        {
+            id: "certifications",
+            title: "Certifications",
+            sub: "& courses",
+            note: "#ffffff",
+            rot: -4,
+            badge: "ticket",
+        },
     ],
 };
 
