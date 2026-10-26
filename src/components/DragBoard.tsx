@@ -14,8 +14,7 @@ type Spot = { x: number; y: number }; // top-left of a pin, in board pixels
 type Spots = Record<string, Spot>;
 type Box = { x: number; y: number; w: number; h: number };
 type Size = { w: number; h: number; zone: number; pw: number; ph: number };
-// A pin is either resting in the cloth, pulled out (needle showing) or being
-// pushed back in.
+// A pin is either resting in the cloth, pulled out or being pressed back in.
 type Phase = "out" | "in";
 
 const FLIGHT_MS = 420; // matches the left/top transition on .pin
@@ -179,7 +178,7 @@ export default function DragBoard({
         [size],
     );
 
-    // Push the needle back into the cloth once the pin has landed.
+    // Press the pin back into the cloth once it has landed.
     const pushIn = useCallback((id: string, after: number) => {
         window.clearTimeout(pushTimers.current[id]);
         pushTimers.current[id] = window.setTimeout(() => {
@@ -420,7 +419,6 @@ export default function DragBoard({
                             {item.title}
                             {item.sub && <small>{item.sub}</small>}
                         </span>
-                        <span className="needle" aria-hidden />
                     </button>
                 );
             })}
