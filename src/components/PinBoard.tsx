@@ -108,7 +108,12 @@ export default function PinBoard() {
         const href = contactLinks[id];
         if (!href) return;
         setLink(id);
-        if (href.startsWith("mailto:")) location.href = href;
+        if (id === "cv") {
+            const a = document.createElement("a");
+            a.href = href;
+            a.download = "";
+            a.click();
+        } else if (href.startsWith("mailto:")) location.href = href;
         else window.open(href, "_blank", "noopener,noreferrer");
         window.clearTimeout(linkTimer.current);
         linkTimer.current = window.setTimeout(() => setLink(null), 1200);

@@ -41,6 +41,7 @@ export const contactLinks: Record<string, string> = {
     github: personalInfo.github,
     linkedin: personalInfo.linkedin,
     email: `mailto:${personalInfo.email}`,
+    cv: personalInfo.cv, // downloaded rather than opened
 };
 
 const noteColors = ["#fff3a8", "#ffd6c9", "#cdeccd", "#cfe3ff", "#f1d9ff", "#ffe2a8"];
@@ -78,6 +79,7 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
         { id: "github", title: "GitHub", note: "#ffffff", rot: -5, badge: "subway" },
         { id: "linkedin", title: "LinkedIn", note: "#ffffff", rot: 4, badge: "ubahn" },
         { id: "email", title: "Email", note: "#ffffff", rot: -3, badge: "airmail" },
+        { id: "cv", title: "Download CV", note: "#ffffff", rot: 5, badge: "luggage" },
     ],
 };
 
