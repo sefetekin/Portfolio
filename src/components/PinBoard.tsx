@@ -25,6 +25,7 @@ const isSection = (v: string): v is SectionId =>
 const angles: Record<SectionId, number> = {
     about: -6,
     experience: 4,
+    research: -4,
     projects: -3,
     skills: 7,
     cv: -8,

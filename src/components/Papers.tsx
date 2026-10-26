@@ -1,7 +1,10 @@
 import {
+    certifications,
+    education,
     internships,
     personalInfo,
     projects,
+    research,
     skills,
     type Skill,
 } from "@/data/portfolio";
@@ -9,6 +12,7 @@ import {
 export type SectionId =
     | "about"
     | "experience"
+    | "research"
     | "projects"
     | "skills"
     | "cv"
@@ -17,6 +21,7 @@ export type SectionId =
 export const sections: { id: SectionId; title: string; note: string }[] = [
     { id: "about", title: "About", note: "#fff3a8" },
     { id: "experience", title: "Experience", note: "#ffd6c9" },
+    { id: "research", title: "Research", note: "#ffe2a8" },
     { id: "projects", title: "Projects", note: "#cdeccd" },
     { id: "skills", title: "Skills", note: "#cfe3ff" },
     { id: "cv", title: "CV", note: "#ffffff" },
@@ -67,8 +72,17 @@ function About() {
             </Paper>
             <Paper i={1}>
                 <h3>Education</h3>
-                <p>{personalInfo.education}</p>
-                <p className="meta">{personalInfo.location}</p>
+                {education.map((e) => (
+                    <div key={e.school}>
+                        <p className="meta">{e.dates}</p>
+                        <p>
+                            <strong>{e.school}</strong>
+                            <br />
+                            {e.degree}
+                        </p>
+                    </div>
+                ))}
+                <p className="meta">Based in {personalInfo.location}</p>
             </Paper>
             <Paper i={2}>
                 <h3>Fun fact</h3>
@@ -95,6 +109,38 @@ function Experience() {
                     <Chips items={job.technologies} />
                 </Paper>
             ))}
+        </>
+    );
+}
+
+function Research() {
+    return (
+        <>
+            {research.map((r, i) => (
+                <Paper key={r.id} i={i}>
+                    <h3>{r.title}</h3>
+                    <p className="meta">{r.dates}</p>
+                    <ul>
+                        {r.points.map((pt) => (
+                            <li key={pt}>{pt}</li>
+                        ))}
+                    </ul>
+                </Paper>
+            ))}
+            <Paper i={research.length}>
+                <h3>Certifications & courses</h3>
+                <ul>
+                    {certifications.map((c) => (
+                        <li key={c.name}>
+                            {c.name}
+                            <br />
+                            <span className="meta">
+                                {c.issuer} · {c.date}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </Paper>
         </>
     );
 }
@@ -155,7 +201,7 @@ function CV() {
     return (
         <Paper i={1} wide>
             <h3>Curriculum Vitae</h3>
-            <p className="meta">PDF · updated by hand, read at your leisure</p>
+            <p className="meta">One page, PDF, updated for 2026-27</p>
             <a className="big-link" href={personalInfo.cv} download>
                 Download CV
             </a>
@@ -206,6 +252,8 @@ export function SectionPapers({ id }: { id: SectionId }) {
             return <About />;
         case "experience":
             return <Experience />;
+        case "research":
+            return <Research />;
         case "projects":
             return <Projects />;
         case "skills":

@@ -14,7 +14,7 @@ const hand = Caveat({
 });
 
 const description =
-    "Servet Efe Tekin: Computer Science student at UCL and software engineer. Drag a pin across the board to read about my experience, projects and CV.";
+    "Servet Efe Tekin: MSc AI & ML student at Imperial College London and software engineer. Drag a pin across the board to read about my experience, research, projects and CV.";
 
 export const metadata: Metadata = {
     title: "Servet Efe Tekin",

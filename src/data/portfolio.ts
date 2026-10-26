@@ -26,59 +26,88 @@ export interface Skill {
 
 export const internships: Internship[] = [
     {
-        id: "squarepoint",
-        title: "Software Engineering Intern",
+        id: "squarepoint-quant",
+        title: "Quantitative Developer Intern",
         company: "Squarepoint Capital",
-        dates: "Jun 2025 - Sept 2025",
+        dates: "Jun 2026 - Sep 2026",
         achievements: [
-            "Investigated FIX messages from 10+ counterparties and trade input routing for 100,000 daily messages",
-            "Individualized enrichment logic to reduce routing table size and improve message processing efficiency",
-            "Built custom FIX message tests using Behave BDD framework with .feature files for validation",
-            "Designed automated weekly cleanup process for 7,000-line JSON key-mapping table with CI schema validation",
-            "Managed GitLab CI/CD pipelines and coordinated production releases with approval-driven workflows",
+            "Developed 3 custom trading add-in dashboards on the QUEST platform used by 20+ traders, enhancing quantitative workflows and data visualisation",
+            "Modularised core QUEST architecture into 6 reusable components adopted across 5 applications, cutting duplicated code by 50%",
+            "Maintained 2-3 mission-critical production applications used daily by 100+ traders, sustaining 99% uptime",
+            "Resolved 5 high-priority production errors with an average resolution time of 30 minutes, safeguarding live execution pipelines",
         ],
-        technologies: [
-            "Python",
-            "Behave BDD",
-            "GitLab CI/CD",
-            "FIX Protocol",
-            "JSON",
-            "Git",
+        technologies: ["QUEST", "Dashboards", "Production Support", "Trading Systems"],
+    },
+    {
+        id: "squarepoint",
+        title: "Software Developer Intern",
+        company: "Squarepoint Capital",
+        dates: "Jun 2025 - Sep 2025",
+        achievements: [
+            "Analysed FIX message flows from 10+ counterparties to identify counterparty-specific enrichment logic for 15+ downstream fields",
+            "Constructed 80+ BDD validation tests per counterparty to verify enrichment behaviour matched requirements",
+            "Reduced a 7,000-line key-mapping table by over 50% by removing redundant and invalid JSON entries and enforcing schema validation in GitLab CI",
+            "Supported 13 production releases using GitLab CI/CD pipelines, feature/release branching and ticket-driven workflows",
         ],
+        technologies: ["Python", "Behave BDD", "FIX Protocol", "GitLab CI/CD", "JSON"],
     },
     {
         id: "avanade",
         title: "Full-Stack Web Developer (Part Time)",
         company: "Avanade",
-        dates: "Sept 2024 - March 2025",
+        dates: "Sep 2024 - Mar 2025",
         achievements: [
-            "Partnered with Avanade on university-industry project to design and deploy Dialogue Hub using Azure tools",
-            "Built and deployed services within Avanade's enterprise Azure environment",
-            "Documented architectural decisions and followed structured DevOps workflows",
-            "Developed accessible chatbot platform for community café supporting visual and auditory impairments",
+            "Built and deployed Dialogue Hub services within Avanade's enterprise Azure environment",
+            "Documented architectural decisions on a companion report site following structured DevOps workflows",
+            "Established an accessible booking platform for a café supporting people with visual and auditory impairments",
+            "Integrated screen reader support, font-size adjustment, high-contrast mode and dyslexia-friendly fonts, following WCAG 2.1 AA",
+            "Enabled full voice input and command support via a conversational AI chatbot handling 10 core commands",
         ],
-        technologies: [
-            "React",
-            "Flask",
-            "SQL",
-            "Azure",
-            "Accessibility Design",
-            "DevOps",
+        technologies: ["React", "Flask", "SQL", "Azure", "Accessibility", "DevOps"],
+    },
+];
+
+export interface Research {
+    id: string;
+    title: string;
+    dates: string;
+    points: string[];
+}
+
+export const research: Research[] = [
+    {
+        id: "games-ml",
+        title: "Machine Learning-Driven Content Generation and Adaptation in Video Games",
+        dates: "Sep 2025 - May 2026",
+        points: [
+            "Applied Phase-Preserving Diffusion to generate in-game assets from player traits and base templates in 5 s each",
+            "Integrated a context-aware LLM commentator reacting to live game state and events with 25 ms average latency",
+            "Built dynamic difficulty adjustment from 10 gameplay metrics, improving preference by 70% across 15 playtesters",
         ],
     },
     {
-        id: "koda",
-        title: "Software Engineering Intern",
-        company: "Ergun Holding - Koda Technologies",
-        dates: "Jun 2024 - July 2024",
-        achievements: [
-            "Developed Garanti Barter website and SQL-based database for 200+ companies using MVC architecture",
-            "Implemented .NET and Entity Framework for full-stack development",
-            "Shadowed full-stack team on 9-month B2B product for 500+ users",
-            "Gained experience in enterprise software development and database management",
+        id: "convex-hull",
+        title: "Performance Evaluation and Comparative Analysis of Convex Hull Algorithms",
+        dates: "Jan 2024 - Mar 2024",
+        points: [
+            "Benchmarked 3 convex hull algorithms (Graham scan, Jarvis march, Quickhull) on synthetic sets",
         ],
-        technologies: ["C#", ".NET", "Entity Framework", "SQL", "MVC", "B2B"],
     },
+    {
+        id: "knee-xray",
+        title: "Classifying Knee X-Rays into Categories of Knee Osteoarthritis",
+        dates: "Sep 2021 - Apr 2022",
+        points: [
+            "Trained a CNN (TensorFlow, Python) on 2,000 X-ray images to classify knee osteoarthritis into 3 severity classes",
+            "Completed an interdisciplinary research programme with a grade of 92.5/100, top 10% of cohort",
+        ],
+    },
+];
+
+export const certifications = [
+    { name: "Getting Started with AI, Agile Explorer & Design Thinking", issuer: "IBM SkillsBuild", date: "Oct 2024" },
+    { name: "Software Engineering Virtual Experience", issuer: "J.P. Morgan · Forage", date: "Jan 2024" },
+    { name: "Mathematics for Machine Learning Specialisation", issuer: "Imperial College London · Coursera", date: "Sep 2022" },
 ];
 
 export const projects: Project[] = [
@@ -86,8 +115,8 @@ export const projects: Project[] = [
         id: "dialogue-hub",
         name: "Dialogue Hub",
         description:
-            "An accessible chatbot platform for community café supporting people with visual and auditory impairments. Features screen reader support, font-size adjustment, high-contrast mode, and dyslexia-friendly options.",
-        stack: ["React", "Flask", "SQL", "Accessibility Design", "Voice Input"],
+            "An accessible booking platform and chatbot for a community café supporting people with visual and auditory impairments. Screen reader support, font-size adjustment, high-contrast mode, dyslexia-friendly fonts (WCAG 2.1 AA) and full voice commands.",
+        stack: ["React", "Flask", "SQL", "Azure", "Voice Input"],
         badge: "Accessibility",
     },
     {
@@ -180,29 +209,40 @@ export const skills: Skill[] = [
     { name: "MVC Architecture", category: "Concepts", proficiency: 85 },
     { name: "Full-Stack Development", category: "Concepts", proficiency: 80 },
     { name: "Machine Learning", category: "Concepts", proficiency: 75 },
+    { name: "Deep Learning", category: "Concepts", proficiency: 75 },
+    { name: "Reinforcement Learning", category: "Concepts", proficiency: 70 },
+    { name: "Natural Language Processing", category: "Concepts", proficiency: 70 },
+    { name: "Diffusion Models & LLMs", category: "Concepts", proficiency: 70 },
     { name: "Accessibility Design", category: "Concepts", proficiency: 80 },
     { name: "CI/CD Workflows", category: "Concepts", proficiency: 80 },
     { name: "DevOps", category: "Concepts", proficiency: 75 },
 ];
 
+export const education = [
+    {
+        school: "Imperial College London",
+        degree: "MSc Computing (Artificial Intelligence and Machine Learning)",
+        dates: "2026 - 2027",
+        courses: ["Deep Learning", "Reinforcement Learning", "Natural Language Processing", "ML for Imaging"],
+    },
+    {
+        school: "University College London",
+        degree: "BSc Computer Science (1st Class, 73.9%), Minor in Mathematics",
+        dates: "2023 - 2026",
+        courses: ["Algorithms & Data Structures", "Software Engineering", "Machine Learning", "Financial Mathematics"],
+    },
+];
+
 export const personalInfo = {
     name: "Servet Efe Tekin",
-    tagline: "2nd Year CS Student @UCL • Software Engineer • Tech Enthusiast",
-    subtitle: "Building accessible tech. Exploring the future.",
-    about: `I'm a Second-Year BSc Computer Science student at University College London (UCL) with a minor in Mathematics, 
-    achieving a 1st Class standing (74.3%). Originally from Istanbul, Turkey, I'm passionate about software engineering 
-    and making people's lives easier through technology. I'm a founding member and treasurer of the UCL Game Development 
-    Society, and treasurer of the Turkish Society. My experience spans from high-frequency trading systems at Squarepoint 
-    Capital to accessible web development at Avanade.`,
+    tagline: "MSc AI & ML @ Imperial • Software Engineer",
+    about: `I'm studying for an MSc in Computing (Artificial Intelligence and Machine Learning) at Imperial College London, after graduating from UCL with a first-class BSc in Computer Science and a minor in Mathematics. Originally from Istanbul, I like building software that makes people's lives easier, from trading tools at Squarepoint Capital, where I've interned twice, to an accessible café booking platform with Avanade. My undergraduate research used diffusion models and LLMs to generate and adapt content in video games.`,
     funFact:
         "I've been playing video games for years - not just for fun, but for the knowledge they provide. They've been my gateway into computer science!",
-    education:
-        "BSc Computer Science (1st Class, 74.3%), Minor in Mathematics, University College London (UCL)",
     location: "London, UK",
     email: "sefetekin@gmail.com",
-    phone: "+44 7748651665",
     github: "https://github.com/sefetekin",
-    linkedin: "https://linkedin.com/in/efe-tekin",
-    website: "https://servetefetekin.com",
+    linkedin: "https://linkedin.com/in/sefetekin",
+    website: "https://sefetekin.com",
     cv: "/cv-servet-efetekin.pdf",
 };
