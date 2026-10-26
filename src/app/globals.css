@@ -630,26 +630,107 @@ a {
     }
 }
 
-/* Bullet points are white text pinned straight onto the fabric. */
+/* Bullet points are pinned up on a mix of papers. */
 .loose.note {
-    padding: 26px 8px 8px;
-    background: none;
-    box-shadow: none;
-    color: var(--on-board);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    color: var(--ink);
 }
 
 .loose.note.lifted {
-    box-shadow: none;
-    text-shadow: 6px 12px 10px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 20px 28px rgba(10, 0, 3, 0.5);
 }
 
-.loose.note p.meta {
-    color: var(--on-board-soft);
+/* Square sticky note in its own colour, curling off the cloth at the bottom. */
+.loose.sticky {
+    width: 230px;
+    min-height: 220px;
+    padding: 30px 18px 18px;
+    background:
+        linear-gradient(170deg, rgba(255, 255, 255, 0.3), transparent 45%),
+        linear-gradient(transparent 85%, rgba(0, 0, 0, 0.06)),
+        var(--note);
+    box-shadow:
+        0 1px 1px rgba(0, 0, 0, 0.15),
+        0 14px 12px -8px rgba(10, 0, 3, 0.6);
 }
 
-.loose.note .chip {
-    border-color: rgba(255, 255, 255, 0.5);
+.loose.sticky p,
+.loose.grid p,
+.loose.torn p {
+    font-family: var(--font-hand), cursive;
+    font-size: 21px;
+    line-height: 1.15;
+}
+
+/* Ruled index card with a red header line. */
+.loose.index {
+    width: 270px;
+    padding: 38px 18px 14px;
+    background:
+        linear-gradient(#e57373, #e57373) 0 33px / 100% 2px no-repeat,
+        repeating-linear-gradient(transparent 0 23px, #a9cbe8 23px 24px) 0 40px / 100% calc(100% - 40px)
+            no-repeat,
+        #fdfcf7;
+}
+
+.loose.index p,
+.loose.torn p {
+    line-height: 24px;
+}
+
+/* Graph paper written on in blue pen. */
+.loose.grid {
+    width: 250px;
+    padding: 30px 18px 18px;
+    color: #1c3557;
+    background:
+        linear-gradient(#d3e3f0 1px, transparent 1px) 0 0 / 16px 16px,
+        linear-gradient(90deg, #d3e3f0 1px, transparent 1px) 0 0 / 16px 16px,
+        #fbfdff;
+}
+
+/* Notebook page torn out along the bottom. */
+.loose.torn {
+    width: 250px;
+    padding: 30px 16px 16px 42px;
+    color: #26324d;
+    background:
+        linear-gradient(90deg, transparent 30px, #f19999 30px 31px, transparent 31px),
+        repeating-linear-gradient(transparent 0 23px, #c5d9ec 23px 24px) 0 6px,
+        #fffef9;
+}
+
+.loose.torn::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 6px;
+    background: radial-gradient(circle at 6px 0, #fffef9 5.5px, transparent 6px) 0 0 / 12px 6px repeat-x;
+}
+
+/* Brown kraft paper. */
+.loose.kraft {
+    width: 240px;
+    color: #3a2712;
+    background:
+        radial-gradient(rgba(60, 35, 10, 0.12) 1px, transparent 1.5px) 0 0 / 7px 7px,
+        linear-gradient(170deg, #d4ae7c, #c39760);
+}
+
+.loose.kraft p.meta {
+    color: #5a3f1e;
+}
+
+.loose.kraft .chip {
+    border-color: rgba(58, 39, 18, 0.4);
+}
+
+@media (max-width: 640px) {
+    .loose.note {
+        width: 100%;
+        min-height: 0;
+    }
 }
 
 /* ---------- pressing pins in, and punctures ---------- */
