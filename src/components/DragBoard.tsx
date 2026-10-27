@@ -10,11 +10,14 @@ export type BoardItem = {
     rot: number;
     badge?: string; // souvenir style, see .b-* in globals.css
     image?: string; // a photo shown as the pin itself
+    group?: string; // pins sharing a group are clustered under its label
 };
 
 type Spot = { x: number; y: number }; // top-left of a pin, in board pixels
 type Spots = Record<string, Spot>;
 type Box = { x: number; y: number; w: number; h: number };
+type Area = { x0: number; y0: number; x1: number; y1: number }; // where pins may land
+type Label = { text: string; x: number; y: number; w: number };
 // `v` is the phone layout: the drop zone is a strip along the bottom
 // instead of the right, and the pages stack downwards.
 type Size = { w: number; h: number; zone: number; pw: number; ph: number; v: boolean };
@@ -52,12 +55,12 @@ const openH = (s: Size) => (s.v ? s.h - s.zone : s.h);
 // Scatter pins over the open part of the board, keeping clear of the
 // decorations, the drop zone and each other. Pure random placement is
 // tried first; on a cramped screen it falls back to a jittered grid.
-function scatter(ids: string[], s: Size, keepOut: Box[]): Spots {
+function scatter(ids: string[], s: Size, keepOut: Box[], area?: Area): Spots {
     const pad = 14;
-    const minX = 16;
-    const maxX = Math.max(minX, openW(s) - s.pw - 16);
-    const minY = 20;
-    const maxY = Math.max(minY, openH(s) - s.ph - 20);
+    const minX = area?.x0 ?? 16;
+    const maxX = Math.max(minX, (area?.x1 ?? openW(s) - 16) - s.pw);
+    const minY = area?.y0 ?? 20;
+    const maxY = Math.max(minY, (area?.y1 ?? openH(s) - 20) - s.ph);
     const clear = (b: Box, placed: Box[]) =>
         !placed.some((p) => overlaps(b, p)) && !keepOut.some((r) => overlaps(b, r));
 
@@ -80,8 +83,10 @@ function scatter(ids: string[], s: Size, keepOut: Box[]): Spots {
         if (Object.keys(out).length === ids.length) return out;
     }
 
-    const top = Math.max(minY, ...keepOut.filter((r) => r.y < s.h / 2).map((r) => r.y + r.h + 8));
-    const bottom = Math.min(openH(s) - 20, ...keepOut.filter((r) => r.y >= s.h / 2).map((r) => r.y - 8));
+    const top = area ? area.y0 : Math.max(minY, ...keepOut.filter((r) => r.y < s.h / 2).map((r) => r.y + r.h + 8));
+    const bottom = area
+        ? area.y1
+        : Math.min(openH(s) - 20, ...keepOut.filter((r) => r.y >= s.h / 2).map((r) => r.y - 8));
     const cols = Math.max(1, Math.floor((maxX + s.pw - minX) / (s.pw + pad)));
     const rows = Math.max(1, Math.ceil(ids.length / cols));
     const cw = (maxX + s.pw - minX) / cols;
@@ -98,6 +103,37 @@ function scatter(ids: string[], s: Size, keepOut: Box[]): Spots {
         };
     });
     return out;
+}
+
+const LABEL_H = 34;
+
+// Grouped pins: split the open board into one band per group, side by side
+// on wide screens (equal widths) and stacked on phones (heights sized by how
+// many pins each holds).
+// Each band gets a label along its top and its pins scattered beneath it.
+function cluster(items: BoardItem[], s: Size, keepOut: Box[]): { spots: Spots; labels: Label[] } {
+    const groups: string[] = [];
+    for (const i of items) if (i.group && !groups.includes(i.group)) groups.push(i.group);
+    const top = Math.max(20, ...keepOut.filter((r) => r.y < s.h / 2).map((r) => r.y + r.h + 8));
+    const bottom = Math.min(openH(s) - 20, ...keepOut.filter((r) => r.y >= s.h / 2).map((r) => r.y - 8));
+    const left = 16;
+    const right = openW(s) - 16;
+    const count = (g: string) => items.filter((i) => i.group === g).length;
+    const total = items.length;
+    const spots: Spots = {};
+    const labels: Label[] = [];
+    let at = s.v ? top : left;
+    for (const g of groups) {
+        const share = s.v ? count(g) / total : 1 / groups.length;
+        const band: Area = s.v
+            ? { x0: left, y0: at, x1: right, y1: at + (bottom - top) * share }
+            : { x0: at, y0: top, x1: at + (right - left) * share, y1: bottom };
+        at = s.v ? band.y1 : band.x1;
+        labels.push({ text: g, x: band.x0, y: band.y0, w: band.x1 - band.x0 - 12 });
+        const ids = items.filter((i) => i.group === g).map((i) => i.id);
+        Object.assign(spots, scatter(ids, s, keepOut, { ...band, y0: band.y0 + LABEL_H }));
+    }
+    return { spots, labels };
 }
 
 const zoneSpot = (s: Size): Spot =>
@@ -153,6 +189,7 @@ export default function DragBoard({
     const [holes, setHoles] = useState<Spot[]>([]);
     const [dragging, setDragging] = useState<string | null>(null);
     const [hot, setHot] = useState(false);
+    const [labels, setLabels] = useState<Label[]>([]);
 
     const size = useCallback((): Size | null => {
         const board = boardRef.current;
@@ -233,11 +270,18 @@ export default function DragBoard({
                 return { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height };
             },
         );
-        const scattered = scatter(
-            items.map((i) => i.id),
-            s,
-            keepOut,
-        );
+        let scattered: Spots;
+        if (items.some((i) => i.group)) {
+            const c = cluster(items, s, keepOut);
+            scattered = c.spots;
+            setLabels(c.labels);
+        } else {
+            scattered = scatter(
+                items.map((i) => i.id),
+                s,
+                keepOut,
+            );
+        }
         home.current = { ...scattered };
         setSpots(scattered);
     }, [items, size]);
@@ -378,6 +422,16 @@ export default function DragBoard({
             <div className="decor" inert={active ? true : undefined}>
                 {children}
             </div>
+
+            {labels.map((l) => (
+                <span
+                    key={l.text}
+                    className="group-label"
+                    style={{ left: l.x, top: l.y, width: l.w }}
+                >
+                    {l.text}
+                </span>
+            ))}
 
             {holes.map((h, i) => (
                 <span key={i} className="hole" style={{ left: h.x, top: h.y }} aria-hidden />

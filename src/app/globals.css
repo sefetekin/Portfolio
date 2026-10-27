@@ -1483,9 +1483,10 @@ a {
 
 /* Real badge photos: a bit smaller so the whole collection fits. */
 .pin.round:has(img) {
-    --badge: 96px;
-    width: var(--badge);
-    height: var(--badge);
+    --badge: 80px;
+    width: calc(var(--badge) + 24px);
+    height: calc(var(--badge) + 40px); /* room for the name underneath */
+    font-size: 17px;
 }
 
 .pin.round .label:has(img) img {
@@ -1493,7 +1494,24 @@ a {
     height: var(--badge);
 }
 
+/* Handwritten heading over each cluster of collected badges. */
+.group-label {
+    position: absolute;
+    padding: 0 6px;
+    font-family: var(--font-hand), cursive;
+    font-size: 24px;
+    line-height: 30px;
+    color: var(--on-board);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+}
+
 @media (max-width: 640px) {
+    .group-label {
+        font-size: 20px;
+        line-height: 26px;
+    }
     .pin.round {
         width: 92px;
         height: 92px;
@@ -1503,7 +1521,9 @@ a {
     }
     /* On phones just the badge; its name is on its page. */
     .pin.round:has(img) {
-        --badge: 64px;
+        --badge: 52px;
+        width: var(--badge);
+        height: var(--badge);
     }
     .pin.round.badge .label:has(img) {
         font-size: 0;
