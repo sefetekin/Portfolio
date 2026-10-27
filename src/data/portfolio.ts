@@ -277,7 +277,7 @@ export const collection: CollectedBadge[] = [
     { id: "game-boy", name: "Game Boy", place: "Nintendo", image: "/collection/game-boy.webp", photos: [] },
     { id: "gba-sp", name: "Game Boy Advance SP", place: "Nintendo", image: "/collection/gba-sp.webp", photos: [] },
     { id: "blood-bag", name: "Mystic Falls Hospital", place: "The Vampire Diaries", image: "/collection/blood-bag.webp", photos: [] },
-    { id: "white-square", name: "Notepad pin", place: "Somewhere", image: "/collection/white-square.webp", photos: [] },
+    { id: "goodnotes", name: "GoodNotes", place: "UCL careers fair, London", image: "/collection/goodnotes.webp", photos: [] },
 ];
 
 export const personalInfo = {
