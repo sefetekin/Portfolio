@@ -274,8 +274,8 @@ export const collection: CollectedBadge[] = [
     { id: "boulderhane", name: "Boulderhane", place: "Istanbul, Türkiye", image: "/collection/boulderhane.webp", photos: [] },
     { id: "snorlax", name: "Snorlax", place: "Pokémon", image: "/collection/snorlax.webp", photos: [] },
     { id: "pokemon", name: "Pokémon friends", place: "Pokémon", image: "/collection/pokemon.webp", photos: [] },
-    { id: "game-boy", name: "Game Boy", place: "Nintendo", image: "/collection/game-boy.webp", photos: [] },
-    { id: "gba-sp", name: "Game Boy Advance SP", place: "Nintendo", image: "/collection/gba-sp.webp", photos: [] },
+    { id: "game-boy", name: "Game Boy", place: "London Gaming Market", year: "2026", image: "/collection/game-boy.webp", photos: [] },
+    { id: "gba-sp", name: "Game Boy Advance SP", place: "London Gaming Market", year: "2026", image: "/collection/gba-sp.webp", photos: [] },
     { id: "blood-bag", name: "Mystic Falls Hospital", place: "The Vampire Diaries", image: "/collection/blood-bag.webp", photos: [] },
     { id: "goodnotes", name: "GoodNotes", place: "UCL careers fair, London", image: "/collection/goodnotes.webp", photos: [] },
 ];
