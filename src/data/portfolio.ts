@@ -261,7 +261,7 @@ export const collection: CollectedBadge[] = [
     { id: "oxford", name: "Oxford", place: "Oxford, UK", image: "/collection/oxford.webp", photos: [] },
     { id: "nyu", name: "NYU", place: "New York, USA", image: "/collection/nyu.webp", photos: [] },
     { id: "ucl-200-alumni", name: "UCL 200 Alumni", place: "London, UK", image: "/collection/ucl-200-alumni.webp", photos: [] },
-    { id: "ucl-alumni", name: "UCL Alumni", place: "London, UK", image: "/collection/ucl-alumni.webp", photos: [] },
+    { id: "imperial-alumni", name: "Imperial Alumni", place: "London, UK", story: "Bought it the day I got in, before graduating.", image: "/collection/imperial-alumni.webp", photos: [] },
     { id: "ucl-200", name: "UCL 200", place: "London, UK", image: "/collection/ucl-200.webp", photos: [] },
     { id: "bath", name: "The Roman Baths", place: "Bath, UK", image: "/collection/bath.webp", photos: [] },
     { id: "scotland", name: "Scotland", place: "Scotland, UK", image: "/collection/scotland.webp", photos: [] },
