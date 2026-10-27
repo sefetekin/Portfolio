@@ -249,16 +249,36 @@ export interface CollectedBadge {
     name: string;
     place: string;
     year?: string;
+    group: "Places" | "Schools" | "Fun finds"; // the cluster it sits in on the board
     image?: string; // a photo of the badge itself, ideally cut out
     photos: string[]; // trip pictures; placeholders are shown until set
     story?: string;
 }
 
 export const collection: CollectedBadge[] = [
-    { id: "badge-1", name: "Badge one", place: "Somewhere in the world", photos: [] },
-    { id: "badge-2", name: "Badge two", place: "Somewhere in the world", photos: [] },
-    { id: "badge-3", name: "Badge three", place: "Somewhere in the world", photos: [] },
-    { id: "badge-4", name: "Badge four", place: "Somewhere in the world", photos: [] },
+    { id: "dartmouth", name: "Dartmouth", group: "Schools", place: "Hanover, USA", image: "/collection/dartmouth.webp", photos: [] },
+    { id: "harvard-1636", name: "Harvard", group: "Schools", place: "Cambridge, USA", image: "/collection/harvard-1636.webp", photos: [] },
+    { id: "imperial", name: "Imperial", group: "Schools", place: "London, UK", image: "/collection/imperial.webp", photos: [] },
+    { id: "oxford", name: "Oxford", group: "Schools", place: "Oxford, UK", image: "/collection/oxford.webp", photos: [] },
+    { id: "nyu", name: "NYU", group: "Schools", place: "New York, USA", image: "/collection/nyu.webp", photos: [] },
+    { id: "ucl-200-alumni", name: "UCL 200 Alumni", group: "Schools", place: "London, UK", image: "/collection/ucl-200-alumni.webp", photos: [] },
+    { id: "imperial-alumni", name: "Imperial Alumni", group: "Schools", place: "London, UK", story: "Bought it when I got in, before I had even graduated.", image: "/collection/imperial-alumni.webp", photos: [] },
+    { id: "ucl-200", name: "UCL 200", group: "Schools", place: "London, UK", image: "/collection/ucl-200.webp", photos: [] },
+    { id: "bath", name: "The Roman Baths", group: "Places", place: "Bath, UK", image: "/collection/bath.webp", photos: [] },
+    { id: "scotland", name: "Scotland", group: "Places", place: "Scotland, UK", image: "/collection/scotland.webp", photos: [] },
+    { id: "sweden", name: "Sweden", group: "Places", place: "Sweden", image: "/collection/sweden.webp", photos: [] },
+    { id: "sevilla", name: "Sevilla", group: "Places", place: "Seville, Spain", image: "/collection/sevilla.webp", photos: [] },
+    { id: "sevilla-tiles", name: "Casa Batlló", group: "Places", place: "Barcelona, Spain", image: "/collection/sevilla-tiles.webp", photos: [] },
+    { id: "mallorca", name: "Mallorca", group: "Places", place: "Mallorca, Spain", image: "/collection/mallorca.webp", photos: [] },
+    { id: "paris", name: "Paris", group: "Places", place: "Paris, France", image: "/collection/paris.webp", photos: [] },
+    { id: "portugal", name: "Lisboa", group: "Places", place: "Lisbon, Portugal", image: "/collection/portugal.webp", photos: [] },
+    { id: "boulderhane", name: "Boulderhane", group: "Fun finds", place: "Istanbul, Türkiye", image: "/collection/boulderhane.webp", photos: [] },
+    { id: "snorlax", name: "Snorlax", group: "Fun finds", place: "A street stall in Paris", story: "Found on a street seller's table somewhere in Paris.", image: "/collection/snorlax.webp", photos: [] },
+    { id: "pokemon", name: "Pokémon friends", group: "Fun finds", place: "A street stall in Paris", story: "Found on a street seller's table somewhere in Paris.", image: "/collection/pokemon.webp", photos: [] },
+    { id: "game-boy", name: "Game Boy", group: "Fun finds", place: "London Gaming Market", year: "2026", image: "/collection/game-boy.webp", photos: [] },
+    { id: "gba-sp", name: "Game Boy Advance SP", group: "Fun finds", place: "London Gaming Market", year: "2026", image: "/collection/gba-sp.webp", photos: [] },
+    { id: "blood-bag", name: "Mystic Falls Hospital", group: "Fun finds", place: "For the Love of Fantasy and Sci-Fi", year: "2026", image: "/collection/blood-bag.webp", photos: [] },
+    { id: "goodnotes", name: "GoodNotes", group: "Fun finds", place: "UCL careers fair, London", image: "/collection/goodnotes.webp", photos: [] },
 ];
 
 export const personalInfo = {

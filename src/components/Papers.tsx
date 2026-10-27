@@ -63,6 +63,9 @@ const noteColors = ["#fff3a8", "#ffd6c9", "#cdeccd", "#cfe3ff", "#f1d9ff", "#ffe
 // Souvenirs with room for a title and a subtitle.
 const wideBadges = ["ticket", "stamp", "tag", "plaque"];
 
+// Collection clusters, left to right (top to bottom on phones).
+const groupOrder = ["Places", "Schools", "Fun finds"];
+
 export const boardItems: Record<BoardSectionId, BoardItem[]> = {
     experience: internships.map((job, i) => ({
         id: job.id,
@@ -105,7 +108,9 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
         { id: "cv", title: "Download CV", note: "#ffffff", rot: 5, badge: "luggage" },
     ],
     cv: [{ id: "cv", title: "Download CV", note: "#ffffff", rot: -4, badge: "luggage" }],
-    collection: collection.map((b, i) => ({
+    collection: [...collection]
+        .sort((a, b) => groupOrder.indexOf(a.group) - groupOrder.indexOf(b.group))
+        .map((b, i) => ({
         id: b.id,
         title: b.name,
         sub: b.place,
@@ -113,6 +118,7 @@ export const boardItems: Record<BoardSectionId, BoardItem[]> = {
         rot: [-6, 5, -3, 7, -5, 3][i % 6],
         badge: "collected",
         image: b.image,
+        group: b.group,
     })),
 };
 
