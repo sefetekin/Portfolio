@@ -256,8 +256,8 @@ export interface CollectedBadge {
 
 export const collection: CollectedBadge[] = [
     { id: "dartmouth", name: "Dartmouth", place: "Hanover, USA", image: "/collection/dartmouth.webp", photos: [] },
-    { id: "harvard-1636", name: "Harvard 1636", place: "Cambridge, USA", image: "/collection/harvard-1636.webp", photos: [] },
-    { id: "harvard-h", name: "Harvard H", place: "Cambridge, USA", image: "/collection/harvard-h.webp", photos: [] },
+    { id: "harvard-1636", name: "Harvard", place: "Cambridge, USA", image: "/collection/harvard-1636.webp", photos: [] },
+    { id: "imperial", name: "Imperial", place: "London, UK", image: "/collection/imperial.webp", photos: [] },
     { id: "oxford", name: "Oxford", place: "Oxford, UK", image: "/collection/oxford.webp", photos: [] },
     { id: "nyu", name: "NYU", place: "New York, USA", image: "/collection/nyu.webp", photos: [] },
     { id: "ucl-200-alumni", name: "UCL 200 Alumni", place: "London, UK", image: "/collection/ucl-200-alumni.webp", photos: [] },
