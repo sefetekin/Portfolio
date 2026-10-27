@@ -267,7 +267,7 @@ export const collection: CollectedBadge[] = [
     { id: "scotland", name: "Scotland", place: "Scotland, UK", image: "/collection/scotland.webp", photos: [] },
     { id: "sweden", name: "Sweden", place: "Sweden", image: "/collection/sweden.webp", photos: [] },
     { id: "sevilla", name: "Sevilla", place: "Seville, Spain", image: "/collection/sevilla.webp", photos: [] },
-    { id: "sevilla-tiles", name: "Tiled wall", place: "Spain", image: "/collection/sevilla-tiles.webp", photos: [] },
+    { id: "sevilla-tiles", name: "Casa Batlló", place: "Barcelona, Spain", image: "/collection/sevilla-tiles.webp", photos: [] },
     { id: "mallorca", name: "Mallorca", place: "Mallorca, Spain", image: "/collection/mallorca.webp", photos: [] },
     { id: "paris", name: "Paris", place: "Paris, France", image: "/collection/paris.webp", photos: [] },
     { id: "portugal", name: "Lisboa", place: "Lisbon, Portugal", image: "/collection/portugal.webp", photos: [] },
@@ -277,7 +277,7 @@ export const collection: CollectedBadge[] = [
     { id: "game-boy", name: "Game Boy", place: "Nintendo", image: "/collection/game-boy.webp", photos: [] },
     { id: "gba-sp", name: "Game Boy Advance SP", place: "Nintendo", image: "/collection/gba-sp.webp", photos: [] },
     { id: "blood-bag", name: "Mystic Falls Hospital", place: "The Vampire Diaries", image: "/collection/blood-bag.webp", photos: [] },
-    { id: "white-square", name: "White square pin", place: "Somewhere", image: "/collection/white-square.webp", photos: [] },
+    { id: "white-square", name: "Notepad pin", place: "Somewhere", image: "/collection/white-square.webp", photos: [] },
 ];
 
 export const personalInfo = {
