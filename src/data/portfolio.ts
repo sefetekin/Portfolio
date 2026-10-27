@@ -255,10 +255,29 @@ export interface CollectedBadge {
 }
 
 export const collection: CollectedBadge[] = [
-    { id: "badge-1", name: "Badge one", place: "Somewhere in the world", photos: [] },
-    { id: "badge-2", name: "Badge two", place: "Somewhere in the world", photos: [] },
-    { id: "badge-3", name: "Badge three", place: "Somewhere in the world", photos: [] },
-    { id: "badge-4", name: "Badge four", place: "Somewhere in the world", photos: [] },
+    { id: "dartmouth", name: "Dartmouth", place: "Hanover, USA", image: "/collection/dartmouth.webp", photos: [] },
+    { id: "harvard-1636", name: "Harvard 1636", place: "Cambridge, USA", image: "/collection/harvard-1636.webp", photos: [] },
+    { id: "harvard-h", name: "Harvard H", place: "Cambridge, USA", image: "/collection/harvard-h.webp", photos: [] },
+    { id: "oxford", name: "Oxford", place: "Oxford, UK", image: "/collection/oxford.webp", photos: [] },
+    { id: "nyu", name: "NYU", place: "New York, USA", image: "/collection/nyu.webp", photos: [] },
+    { id: "ucl-200-alumni", name: "UCL 200 Alumni", place: "London, UK", image: "/collection/ucl-200-alumni.webp", photos: [] },
+    { id: "ucl-alumni", name: "UCL Alumni", place: "London, UK", image: "/collection/ucl-alumni.webp", photos: [] },
+    { id: "ucl-200", name: "UCL 200", place: "London, UK", image: "/collection/ucl-200.webp", photos: [] },
+    { id: "bath", name: "The Roman Baths", place: "Bath, UK", image: "/collection/bath.webp", photos: [] },
+    { id: "scotland", name: "Scotland", place: "Scotland, UK", image: "/collection/scotland.webp", photos: [] },
+    { id: "sweden", name: "Sweden", place: "Sweden", image: "/collection/sweden.webp", photos: [] },
+    { id: "sevilla", name: "Sevilla", place: "Seville, Spain", image: "/collection/sevilla.webp", photos: [] },
+    { id: "sevilla-tiles", name: "Tiled wall", place: "Spain", image: "/collection/sevilla-tiles.webp", photos: [] },
+    { id: "mallorca", name: "Mallorca", place: "Mallorca, Spain", image: "/collection/mallorca.webp", photos: [] },
+    { id: "paris", name: "Paris", place: "Paris, France", image: "/collection/paris.webp", photos: [] },
+    { id: "portugal", name: "Lisboa", place: "Lisbon, Portugal", image: "/collection/portugal.webp", photos: [] },
+    { id: "boulderhane", name: "Boulderhane", place: "Istanbul, Türkiye", image: "/collection/boulderhane.webp", photos: [] },
+    { id: "snorlax", name: "Snorlax", place: "Pokémon", image: "/collection/snorlax.webp", photos: [] },
+    { id: "pokemon", name: "Pokémon friends", place: "Pokémon", image: "/collection/pokemon.webp", photos: [] },
+    { id: "game-boy", name: "Game Boy", place: "Nintendo", image: "/collection/game-boy.webp", photos: [] },
+    { id: "gba-sp", name: "Game Boy Advance SP", place: "Nintendo", image: "/collection/gba-sp.webp", photos: [] },
+    { id: "blood-bag", name: "Mystic Falls Hospital", place: "The Vampire Diaries", image: "/collection/blood-bag.webp", photos: [] },
+    { id: "white-square", name: "White square pin", place: "Somewhere", image: "/collection/white-square.webp", photos: [] },
 ];
 
 export const personalInfo = {

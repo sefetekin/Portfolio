@@ -1481,6 +1481,18 @@ a {
     color: var(--on-board-soft);
 }
 
+/* Real badge photos: a bit smaller so the whole collection fits. */
+.pin.round:has(img) {
+    --badge: 96px;
+    width: var(--badge);
+    height: var(--badge);
+}
+
+.pin.round .label:has(img) img {
+    width: var(--badge);
+    height: var(--badge);
+}
+
 @media (max-width: 640px) {
     .pin.round {
         width: 92px;
@@ -1488,6 +1500,13 @@ a {
     }
     .pin.round.badge {
         font-size: 16px;
+    }
+    /* On phones just the badge; its name is on its page. */
+    .pin.round:has(img) {
+        --badge: 64px;
+    }
+    .pin.round.badge .label:has(img) {
+        font-size: 0;
     }
 }
 
