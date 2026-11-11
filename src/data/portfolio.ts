@@ -173,7 +173,7 @@ export const projects: Project[] = [
         id: "portfolio-website",
         name: "Portfolio Website",
         description:
-            "This site: a fabric board of souvenir badges. Drop a badge on the drop zone to open its page. Built with Next.js and TypeScript.",
+            "This site: a 3D projection desk. Slide an object onto the pad and its contents project onto the desk. Built with Next.js and TypeScript.",
         stack: ["Next.js", "TypeScript", "Pointer Events", "CSS"],
         github: "https://github.com/sefetekin/Portfolio",
         demo: "https://www.sefetekin.com",
