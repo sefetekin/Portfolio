@@ -48,7 +48,15 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className={`${body.variable} ${mono.variable} ${display.variable}`}>
+        <html lang="en" className={`${body.variable} ${mono.variable} ${display.variable}`} suppressHydrationWarning>
+            <head>
+                {/* first visit only: play the boot sequence (set before paint so the desk doesn't flash) */}
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `try{if(!localStorage.getItem("desk-booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("boot")}catch(e){}`,
+                    }}
+                />
+            </head>
             <body>
                 {children}
             </body>
