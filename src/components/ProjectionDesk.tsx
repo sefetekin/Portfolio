@@ -17,9 +17,9 @@ type ObjectId = "cv" | CardId | "research" | "projects" | "contact" | "collectio
 
 /** one ID card per role on the desk; `role` is the id in data/portfolio.ts */
 const CARDS: Record<CardId, { role: string; org: string; line: string; year: string; tilt: string }> = {
-    "sq-quant": { role: "squarepoint-quant", org: "SQUAREPOINT", line: "Quant dev intern", year: "2026", tilt: "-5deg" },
-    "sq-dev": { role: "squarepoint", org: "SQUAREPOINT", line: "Software dev intern", year: "2025", tilt: "3deg" },
-    avanade: { role: "avanade", org: "AVANADE", line: "Full-stack developer", year: "2024 · 25", tilt: "-2deg" },
+    "sq-quant": { role: "squarepoint-quant", org: "SQUAREPOINT", line: "Quant dev intern", year: "2026", tilt: "0deg" },
+    "sq-dev": { role: "squarepoint", org: "SQUAREPOINT", line: "Software dev intern", year: "2025", tilt: "0deg" },
+    avanade: { role: "avanade", org: "AVANADE", line: "Full-stack developer", year: "2024 · 25", tilt: "0deg" },
 };
 const isCard = (id: ObjectId): id is CardId => id in CARDS;
 const roleOf = (id: CardId) => internships.find((i) => i.id === CARDS[id].role)!;
@@ -31,20 +31,22 @@ interface DeskObject {
     /** desktop position, % of the desk */
     x: string;
     y: string;
+    /** how far it slides sideways (in % of the desk width) to clear the centre while a hologram is open */
+    dx: number;
     /** phone position, % of the desk */
     mx: string;
     my: string;
 }
 
 const OBJECTS: DeskObject[] = [
-    { id: "cv", label: "CV.PDF", meta: "2 pages", x: "9%", y: "22%", mx: "7%", my: "10%" },
-    { id: "sq-quant", label: "QUANT DEV", meta: "2026", x: "20.5%", y: "14%", mx: "35%", my: "5.5%" },
-    { id: "sq-dev", label: "SOFTWARE DEV", meta: "2025", x: "31%", y: "20%", mx: "35%", my: "19.5%" },
-    { id: "avanade", label: "AVANADE", meta: "2024", x: "43%", y: "15%", mx: "35%", my: "33.5%" },
-    { id: "research", label: "RESEARCH", meta: `${research.length} papers`, x: "48%", y: "30%", mx: "58%", my: "35%" },
-    { id: "projects", label: "PROJECTS (E:)", meta: `${projects.length} mounted`, x: "12%", y: "62%", mx: "8%", my: "47%" },
-    { id: "contact", label: "CONTACT", x: "60%", y: "58%", mx: "74%", my: "63%" },
-    { id: "collection", label: "COLLECTION", meta: `${collection.length} pins`, x: "32%", y: "54%", mx: "12%", my: "61%" },
+    { id: "cv", label: "CV.PDF", meta: "2 pages", x: "9%", y: "12%", dx: -6, mx: "6%", my: "6%" },
+    { id: "sq-quant", label: "QUANT DEV", meta: "2026", x: "26%", y: "21%", dx: -13, mx: "30%", my: "12%" },
+    { id: "sq-dev", label: "SOFTWARE DEV", meta: "2025", x: "40%", y: "8%", dx: -16, mx: "58%", my: "5%" },
+    { id: "avanade", label: "AVANADE", meta: "2024", x: "62%", y: "17%", dx: 10, mx: "72%", my: "20%" },
+    { id: "research", label: "RESEARCH", meta: `${research.length} papers`, x: "79%", y: "7%", dx: 7, mx: "7%", my: "28%" },
+    { id: "contact", label: "CONTACT", x: "84%", y: "44%", dx: 8, mx: "83%", my: "42%" },
+    { id: "projects", label: "PROJECTS (E:)", meta: `${projects.length} mounted`, x: "69%", y: "71%", dx: 16, mx: "62%", my: "75%" },
+    { id: "collection", label: "COLLECTION", meta: `${collection.length} pins`, x: "14%", y: "58%", dx: -10, mx: "6%", my: "66%" },
 ];
 
 
@@ -379,7 +381,8 @@ function holoOf(id: ObjectId): HoloSpec {
 /** Index-based position of an item in its layout, used for the arc and bobbing offsets. */
 function slotStyle(layout: HoloSpec["layout"], i: number, n: number): CSSProperties {
     const mid = (n - 1) / 2;
-    const k = n > 1 ? (i - mid) / mid : 0; // -1 … 1 across the set
+    // -1 … 1 across the set (for the grid, across the 3 columns)
+    const k = layout === "grid" ? (i % 3) - 1 : n > 1 ? (i - mid) / mid : 0;
     return {
         "--i": i,
         "--k": k.toFixed(3),
@@ -482,7 +485,6 @@ function HoloStage({
                                 className="hpanel"
                                 data-item={it.id}
                                 aria-pressed={selected === it.id}
-                                aria-label={spec.layout === "cloud" ? undefined : undefined}
                                 onClick={() => setSelected(it.id)}
                                 onDoubleClick={() => it.detail && setFocus(it.id)}
                                 onKeyDown={(e) => {
@@ -727,9 +729,9 @@ export default function ProjectionDesk() {
         const el = objRefs.current[id];
         const pad = padRef.current;
         if (!el || !pad) return;
-        // snap the object onto the centre of the pad
-        el.style.left = `${pad.offsetLeft + pad.offsetWidth / 2 - el.offsetWidth / 2}px`;
-        el.style.top = `${pad.offsetTop + pad.offsetHeight / 2 - el.offsetHeight / 2}px`;
+        // snap the object exactly onto the centre of the pad (the pad is placed by its centre: left/top + translate -50%)
+        el.style.left = `${pad.offsetLeft - el.offsetWidth / 2}px`;
+        el.style.top = `${pad.offsetTop - el.offsetHeight / 2}px`;
         setArmed(true);
         setScanKey((k) => k + 1);
         openRef.current = id;
@@ -803,7 +805,22 @@ export default function ProjectionDesk() {
         };
     }, [close, openId, placeWhy]);
 
-    // cursor light on the grid + labels that brighten as the cursor gets near
+    // clicking anywhere outside the holograms (and not on another object or the top bar) puts the object back
+    useEffect(() => {
+        if (!openId) return;
+        const onDown = (e: PointerEvent) => {
+            const t = e.target as HTMLElement | null;
+            if (!t || t.closest(".hpanel, .hslot, .hhead, .stage.cloud .hset, .obj, .top")) return;
+            const cur = openRef.current;
+            close();
+            blipRef.current("drop");
+            if (cur) objRefs.current[cur]?.focus({ preventScroll: true });
+        };
+        window.addEventListener("pointerdown", onDown);
+        return () => window.removeEventListener("pointerdown", onDown);
+    }, [openId, close]);
+
+    // cursor light on the desk + labels that brighten as the cursor gets near
     useEffect(() => {
         let raf = 0;
         let last: PointerEvent | null = null;
@@ -978,8 +995,12 @@ export default function ProjectionDesk() {
                 </div>
             </div>
 
-            <div className={`scene${openId ? " dive" : ""}`}>
+            <div className={`scene${openId ? " dive" : ""}${openId && reached(phase, "outline") ? " projecting" : ""}`}>
                 <div className="surface" ref={surfaceRef}>
+                    {/* the desk's thickness: real 3D faces hanging down from the front and sides */}
+                    <div className="slab slab-f" aria-hidden="true" />
+                    <div className="slab slab-l" aria-hidden="true" />
+                    <div className="slab slab-r" aria-hidden="true" />
                     <div className="glow" ref={glowRef} aria-hidden="true" />
                     <div className="etch">
                         MSc AI &amp; ML · Imperial College London
@@ -1040,7 +1061,7 @@ export default function ProjectionDesk() {
                         </div>
                     )}
 
-                    {openId && reached(phase, "label") && content && (
+                    {openId && reached(phase, "label") && phase !== "content" && content && (
                         <div className={`ident${content.warm ? " warm" : ""}`} key={`id-${scanKey}`}>
                             <small>Scan complete</small>
                             <b>
@@ -1065,7 +1086,7 @@ export default function ProjectionDesk() {
                             }}
                             className={`obj${dragging === o.id ? " dragging" : ""}${openId === o.id ? " onpad" : ""}`}
                             data-id={o.id}
-                            style={{ "--x": o.x, "--y": o.y, "--mx": o.mx, "--my": o.my, "--i": i } as CSSProperties}
+                            style={{ "--x": o.x, "--y": o.y, "--dx": o.dx, "--mx": o.mx, "--my": o.my, "--i": i } as CSSProperties}
                             tabIndex={0}
                             role="button"
                             aria-label={`Open ${o.label.toLowerCase()}`}
@@ -1140,8 +1161,8 @@ export default function ProjectionDesk() {
                     <Typewriter text={`Welcome. ${OBJECTS.length} objects on the desk. Drag one onto the pad to scan it.`} speed={22} />
                 ) : (
                     <>
-                        Drag any object onto the <b>pad in the top right</b>, or flick it there. Its contents project
-                        onto the desk below it.
+                        Drag any object onto the <b>scanner pad</b> in the middle, or flick it there. Its hologram rises
+                        above the desk.
                     </>
                 )}
             </div>
