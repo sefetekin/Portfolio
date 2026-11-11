@@ -1,5 +1,5 @@
-import PinBoard from "@/components/PinBoard";
+import ProjectionDesk from "@/components/ProjectionDesk";
 
 export default function Home() {
-    return <PinBoard />;
+    return <ProjectionDesk />;
 }

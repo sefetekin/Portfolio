@@ -1,24 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Cinzel, Inter } from "next/font/google";
+import { Chakra_Petch, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const body = Inter({
+const body = IBM_Plex_Sans({
     subsets: ["latin"],
+    weight: ["400", "500", "600"],
     variable: "--font-body",
 });
 
-const hand = Caveat({
+const mono = JetBrains_Mono({
     subsets: ["latin"],
-    weight: ["500", "700"],
-    variable: "--font-hand",
+    weight: ["400", "600"],
+    variable: "--font-mono",
 });
 
 const description =
-    "Servet Efe Tekin: MSc AI & ML student at Imperial College London and software engineer. Drag a pin across the board to read about my experience, research, projects and CV.";
+    "Servet Efe Tekin: MSc AI & ML student at Imperial College London and software engineer. Slide the objects on my desk onto the projection pad to read about my experience, research, projects, CV and pin collection.";
 
-const display = Cinzel({
+const display = Chakra_Petch({
     subsets: ["latin"],
-    weight: ["700"],
+    weight: ["500", "600", "700"],
     variable: "--font-display",
 });
 
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
     width: "device-width",
     initialScale: 1,
-    themeColor: "#6b4423",
+    themeColor: "#06080b",
 };
 
 export default function RootLayout({
@@ -47,8 +48,16 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body className={`${body.variable} ${hand.variable} ${display.variable}`}>
+        <html lang="en" className={`${body.variable} ${mono.variable} ${display.variable}`} suppressHydrationWarning>
+            <head>
+                {/* first visit only: play the boot sequence (set before paint so the desk doesn't flash) */}
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `try{if(!localStorage.getItem("desk-booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("boot")}catch(e){}`,
+                    }}
+                />
+            </head>
+            <body>
                 {children}
             </body>
         </html>
