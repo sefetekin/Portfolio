@@ -50,10 +50,10 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${body.variable} ${mono.variable} ${display.variable}`} suppressHydrationWarning>
             <head>
-                {/* first visit only: play the boot sequence (set before paint so the desk doesn't flash) */}
+                {/* play the entry sequence on every load (set before paint so the desk doesn't flash) */}
                 <script
                     dangerouslySetInnerHTML={{
-                        __html: `try{if(!localStorage.getItem("desk-booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("boot")}catch(e){}`,
+                        __html: `try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("boot")}catch(e){}`,
                     }}
                 />
             </head>

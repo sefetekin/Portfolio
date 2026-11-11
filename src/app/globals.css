@@ -439,21 +439,40 @@ button{font:inherit;color:inherit}
 .stage.blocks:not(.world) .hset{display:flex;flex-direction:column;gap:10px;overflow:auto;justify-content:start}
 .stage.blocks:not(.world) .hset>.hslot{flex:none}
 
-/* ---------- first visit: boot sequence (html.boot is set by an inline script in the layout) ---------- */
+/* ---------- entry sequence on every load (html.boot is set before paint by an inline script in the layout; any click or key skips it) ----------
+   0s desk rises in · .25s light sweeps the metal rim · .3s the mat lights up from the pad · .35s pad powers up, rings spin up
+   .5s+ objects appear as wireframes and fill in one by one · labels type in · greeting typed at the bottom */
 @property --boot-r{syntax:"<percentage>";inherits:false;initial-value:150%}
+html.boot .scene{animation:desk-in .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes desk-in{from{opacity:0;translate:0 30px}}
 html.boot .surface{-webkit-mask-image:radial-gradient(circle at var(--pcx) var(--pcy),#000 var(--boot-r),transparent calc(var(--boot-r) + 14%));
-  mask-image:radial-gradient(circle at var(--pcx) var(--pcy),#000 var(--boot-r),transparent calc(var(--boot-r) + 14%));animation:grid-in .9s ease-out both}
+  mask-image:radial-gradient(circle at var(--pcx) var(--pcy),#000 var(--boot-r),transparent calc(var(--boot-r) + 14%));animation:grid-in .9s .3s ease-out both}
 @keyframes grid-in{from{--boot-r:0%}to{--boot-r:150%}}
-html.boot .obj>:first-child{animation:materialize .8s calc(.45s + var(--i) * .09s) both}
+/* a light glint travelling along the brushed-metal rim */
+.glint{display:none;position:absolute;inset:calc(-1 * var(--rim));border-radius:16px;pointer-events:none;padding:var(--rim);
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.85) 50%,transparent 65%) -150% 0/250% 100% no-repeat;
+  -webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mix-blend-mode:screen}
+html.boot .glint{display:block;animation:glint 1.1s .25s ease-in-out both}
+@keyframes glint{from{background-position:-150% 0}to{background-position:250% 0}}
+/* the pad powers up: core flickers on, ring settles, HUD rings spin up */
+html.boot .pad .ring{animation:pad-on .7s .35s cubic-bezier(.2,.9,.3,1.2) both}
+html.boot .pad .ring::before{animation:core-on .8s .35s steps(1,end) both,breathe 3.2s 1.2s ease-in-out infinite}
+@keyframes pad-on{from{scale:.7;opacity:0}}
+@keyframes core-on{0%{opacity:0}20%{opacity:.8}30%{opacity:.15}45%{opacity:1}55%{opacity:.4}70%,100%{opacity:1}}
+html.boot .pad .hud{animation:fadein .5s .4s both}
+html.boot .hud .r1{animation:turn 40s linear infinite,lockspin 1.4s .4s cubic-bezier(.3,0,.1,1)}
+html.boot .hud .r2{animation:turn 26s linear infinite reverse,lockspin-r 1.4s .4s cubic-bezier(.3,0,.1,1)}
+html.boot .hudtxt{animation:fadein .4s 1.4s both}
+/* objects: wireframe first, then solid */
+html.boot .obj>:first-child{animation:materialize .8s calc(.5s + var(--i) * .08s) both}
 @keyframes materialize{
   0%{opacity:0;filter:brightness(0) drop-shadow(0 0 1px var(--acc)) drop-shadow(0 0 1px var(--acc))}
   20%{opacity:1}
   55%{filter:brightness(0) drop-shadow(0 0 1px var(--acc)) drop-shadow(0 0 1px var(--acc))}
   100%{opacity:1;filter:brightness(1) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)}}
-html.boot .obj .tag{animation:type-in .5s calc(.95s + var(--i) * .09s) both}
+html.boot .obj .tag{animation:type-in .45s calc(1s + var(--i) * .08s) both}
 @keyframes type-in{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-html.boot .obj .frame,html.boot .why,html.boot .obj::after{animation:fadein .4s calc(1s + var(--i,6) * .09s) both}
-html.boot .pad .hud{animation:fadein .6s .2s both}
+html.boot .obj .frame,html.boot .why,html.boot .obj::after,html.boot .etch{animation:fadein .4s calc(1s + var(--i,6) * .08s) both}
 
 @media (prefers-reduced-motion:reduce){.surface,.obj{transition:none!important}*{animation:none!important}}
 
