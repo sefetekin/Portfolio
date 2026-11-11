@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import {
     certifications,
@@ -10,10 +10,12 @@ import {
     personalInfo,
     projects,
     research,
+    skills,
+    type Skill,
 } from "@/data/portfolio";
 
 type CardId = "sq-quant" | "sq-dev" | "avanade";
-type ObjectId = "cv" | CardId | "research" | "projects" | "contact" | "collection";
+type ObjectId = "cv" | CardId | "research" | "projects" | "contact" | "collection" | "skills";
 
 /** one ID card per role on the desk; `role` is the id in data/portfolio.ts */
 const CARDS: Record<CardId, { role: string; org: string; line: string; year: string; tilt: string }> = {
@@ -46,6 +48,7 @@ const OBJECTS: DeskObject[] = [
     { id: "research", label: "RESEARCH", meta: `${research.length} papers`, x: "79%", y: "7%", dx: 7, mx: "7%", my: "28%" },
     { id: "contact", label: "CONTACT", x: "84%", y: "44%", dx: 8, mx: "83%", my: "42%" },
     { id: "projects", label: "PROJECTS (E:)", meta: `${projects.length} mounted`, x: "69%", y: "71%", dx: 16, mx: "62%", my: "75%" },
+    { id: "skills", label: "SKILLS", meta: `${skills.length} cores`, x: "41%", y: "73%", dx: -14, mx: "43%", my: "63%" },
     { id: "collection", label: "COLLECTION", meta: `${collection.length} pins`, x: "14%", y: "58%", dx: -10, mx: "6%", my: "66%" },
 ];
 
@@ -91,6 +94,17 @@ function ObjectArt({ id }: { id: ObjectId }) {
             );
         case "projects":
             return <div className="art-usb" />;
+        case "skills":
+            return (
+                <div className="art-chip">
+                    <div className="die">
+                        <div className="lid">
+                            <b>SKILLS</b>
+                            <small>{skills.length} cores</small>
+                        </div>
+                    </div>
+                </div>
+            );
         case "contact":
             return (
                 <div className="art-phone">
@@ -182,22 +196,244 @@ function Contact() {
     );
 }
 
+/* ---------- skills network: which skills were used where ---------- */
+
+interface Work {
+    id: string;
+    kind: "Role" | "Project" | "Research";
+    name: string;
+    when?: string;
+    tags: string[];
+    text: string;
+}
+
+const WORKS: Work[] = [
+    ...internships.map((i) => ({
+        id: `role:${i.id}`,
+        kind: "Role" as const,
+        name: `${i.title} · ${i.company}`,
+        when: i.dates,
+        tags: i.technologies,
+        text: i.achievements.join(" "),
+    })),
+    ...projects.map((p) => ({
+        id: `project:${p.id}`,
+        kind: "Project" as const,
+        name: p.name,
+        tags: p.stack,
+        text: p.description,
+    })),
+    ...research.map((r) => ({
+        id: `research:${r.id}`,
+        kind: "Research" as const,
+        name: r.short,
+        when: r.dates,
+        tags: [],
+        text: `${r.title} ${r.points.join(" ")}`,
+    })),
+];
+
+/** extra words that count as a mention of a skill */
+const ALIASES: Record<string, string[]> = {
+    "HTML/CSS": ["HTML", "CSS"],
+    "GitLab CI/CD": ["GitLab CI", "GitLab"],
+    "MVC Architecture": ["MVC"],
+    "Algorithms & Data Structures": ["algorithm", "algorithms"],
+    "Machine Learning": ["machine learning", "CNN", "classify"],
+    "Deep Learning": ["CNN", "diffusion", "neural"],
+    "Diffusion Models & LLMs": ["diffusion", "LLM"],
+    "Natural Language Processing": ["LLM", "NLP"],
+    "Accessibility Design": ["accessibility", "accessible", "WCAG", "screen reader"],
+    "CI/CD Workflows": ["CI/CD", "GitLab CI", "release"],
+    "Full-Stack Development": ["full-stack", "web app"],
+    DevOps: ["DevOps"],
+    Azure: ["Azure"],
+    ".NET": [".NET"],
+};
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function mentions(skill: string, w: Work) {
+    const terms = [skill, ...(ALIASES[skill] ?? [])];
+    const lower = w.tags.map((t) => t.toLowerCase());
+    if (terms.some((t) => lower.includes(t.toLowerCase()))) return true;
+    if (skill.length <= 2) return false; // "C" would match everything in free text
+    return terms.some((t) => new RegExp(`(^|[^\\w])${escapeRe(t)}(?![\\w#+])`, "i").test(w.text));
+}
+const USES: Record<string, string[]> = Object.fromEntries(
+    skills.map((s) => [s.name, WORKS.filter((w) => mentions(s.name, w)).map((w) => w.id)]),
+);
+const SKILL_CATS: Skill["category"][] = ["Languages", "Frameworks", "Tools", "Concepts"];
+
+const FocusCtx = createContext<{ focus: string | null; setFocus: (id: string | null) => void }>({
+    focus: null,
+    setFocus: () => {},
+});
+
+function SkillsNet() {
+    const { focus, setFocus } = useContext(FocusCtx);
+    const [active, setActive] = useState<string | null>(null); // a skill name
+    const [hoverWork, setHoverWork] = useState<string | null>(null);
+    const [lines, setLines] = useState<{ d: string; key: string }[]>([]);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const opened = focus?.startsWith("skill:") ? skills.find((s) => `skill:${s.name}` === focus) : null;
+
+    // start by tracing the strongest skill, once the hologram has settled
+    useEffect(() => {
+        const t = setTimeout(() => setActive((a) => a ?? skills[0].name), 900);
+        return () => clearTimeout(t);
+    }, []);
+
+    // draw curved lines from the active skill to every piece of work that mentions it
+    // (or, when hovering a piece of work, from it to every skill it uses)
+    const measure = useCallback(() => {
+        const root = rootRef.current;
+        if (!root) return setLines([]);
+        const box = root.getBoundingClientRect();
+        // the hologram may be scaled by 3D perspective: convert screen pixels back to its own pixels
+        const kx = box.width / (root.offsetWidth || 1);
+        const ky = box.height / (root.offsetHeight || 1);
+        const pt = (el: Element | null, side: "r" | "l") => {
+            if (!el) return null;
+            const r = el.getBoundingClientRect();
+            return { x: ((side === "r" ? r.right : r.left) - box.left) / kx, y: (r.top + r.height / 2 - box.top) / ky };
+        };
+        const pairs: [string, string][] = hoverWork
+            ? skills.filter((s) => USES[s.name].includes(hoverWork)).map((s) => [s.name, hoverWork])
+            : active
+              ? USES[active].map((w) => [active, w])
+              : [];
+        setLines(
+            pairs.flatMap(([s, w]) => {
+                const a = pt(root.querySelector(`[data-skill="${CSS.escape(s)}"]`), "r");
+                const b = pt(root.querySelector(`[data-work="${CSS.escape(w)}"]`), "l");
+                if (!a || !b) return [];
+                const mx = (a.x + b.x) / 2;
+                return [{ key: `${s}>${w}`, d: `M${a.x},${a.y} C${mx},${a.y} ${mx},${b.y} ${b.x},${b.y}` }];
+            }),
+        );
+    }, [active, hoverWork]);
+    useLayoutEffect(() => {
+        measure();
+        const t = setTimeout(measure, 450);
+        window.addEventListener("resize", measure);
+        return () => {
+            clearTimeout(t);
+            window.removeEventListener("resize", measure);
+        };
+    }, [measure, opened]);
+
+    const lit = new Set(hoverWork ? [hoverWork] : active ? USES[active] : []);
+    const litSkills = new Set(hoverWork ? skills.filter((s) => USES[s.name].includes(hoverWork)).map((s) => s.name) : active ? [active] : []);
+
+    if (opened) {
+        const used = WORKS.filter((w) => USES[opened.name].includes(w.id));
+        return (
+            <div className="sknet-detail">
+                <button type="button" className="back" onClick={() => setFocus(null)}>
+                    ← All skills
+                </button>
+                <span className="hk">{opened.category}</span>
+                <h3>{opened.name}</h3>
+                <div className="meter" aria-label={`Proficiency ${opened.proficiency} out of 100`}>
+                    <i style={{ width: `${opened.proficiency}%` }} />
+                </div>
+                <h4 className="sub">{used.length ? `Used in ${used.length}` : "Used in"}</h4>
+                {used.length ? (
+                    <ul className="worklist">
+                        {used.map((w) => (
+                            <li key={w.id}>
+                                <span className="hk">{w.kind}</span> {w.name}
+                                {w.when && <span className="when"> · {w.when}</span>}
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>Not tied to a specific role or project on this site yet.</p>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div className="sknet" ref={rootRef} onMouseLeave={() => setHoverWork(null)}>
+            <svg className="sklines" aria-hidden="true">
+                {lines.map((l) => (
+                    <path key={l.key} d={l.d} pathLength={1} />
+                ))}
+            </svg>
+            <div className="skcols">
+                {SKILL_CATS.map((cat) => (
+                    <div className="skcol" key={cat}>
+                        <span className="hk">{cat}</span>
+                        {skills
+                            .filter((s) => s.category === cat)
+                            .map((s) => (
+                                <button
+                                    key={s.name}
+                                    type="button"
+                                    className={`skchip${litSkills.has(s.name) ? " lit" : ""}${USES[s.name].length ? "" : " unused"}`}
+                                    data-skill={s.name}
+                                    aria-pressed={active === s.name}
+                                    onMouseEnter={() => {
+                                        setHoverWork(null);
+                                        setActive(s.name);
+                                    }}
+                                    onFocus={() => setActive(s.name)}
+                                    onClick={() => setActive(s.name)}
+                                    onDoubleClick={() => setFocus(`skill:${s.name}`)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            setFocus(`skill:${s.name}`);
+                                        }
+                                    }}
+                                >
+                                    <span>{s.name}</span>
+                                    <i style={{ width: `${s.proficiency}%` }} />
+                                </button>
+                            ))}
+                    </div>
+                ))}
+            </div>
+            <div className="skworks">
+                <span className="hk">Where it was used</span>
+                {WORKS.map((w) => (
+                    <div
+                        key={w.id}
+                        className={`work${lit.has(w.id) ? " lit" : ""}`}
+                        data-work={w.id}
+                        title={w.name}
+                        onMouseEnter={() => setHoverWork(w.id)}
+                    >
+                        <span className="hk">{w.kind}</span>
+                        <b>{w.name}</b>
+                    </div>
+                ))}
+            </div>
+            <p className="skhint">Hover a skill to trace where it was used · double-click (or Enter) for detail</p>
+        </div>
+    );
+}
+
 /* ---------- holograms: what each scanned object projects above the desk ---------- */
 
 interface HoloItem {
     id: string;
     /** the floating hologram in the set */
     front: ReactNode;
-    /** the expanded view when the item is opened; omitted means it can't be opened further */
-    detail?: ReactNode;
+    /** opened view, split into separate hologram blocks; omitted means it can't be opened */
+    detail?: ReactNode[];
 }
 interface HoloSpec {
     kicker: string;
     title: string;
     note?: string;
     warm?: boolean;
-    /** arc: a few panels fanned in an arc · grid: tiles · cloud: many small floating items · single: one large hologram */
-    layout: "arc" | "grid" | "cloud" | "single";
+    /**
+     * arc: a few panels fanned around the object · grid: tiles in a horseshoe · cloud: many small floating items
+     * blocks: one subject split into separate, non-interactive blocks around the object · net: one large interactive hologram
+     */
+    layout: "arc" | "grid" | "cloud" | "blocks" | "net";
     items: HoloItem[];
 }
 
@@ -207,26 +443,36 @@ function holoOf(id: ObjectId): HoloSpec {
         return {
             kicker: `ID card · ${i.company}`,
             title: i.title,
-            layout: "single",
+            layout: "blocks",
             items: [
                 {
-                    id,
+                    id: "card",
                     front: (
-                        <div className="idholo">
+                        <>
                             <div className="idart">
                                 <ObjectArt id={id} />
                             </div>
-                            <div className="entry">
-                                <h3>{i.company}</h3>
-                                <div className="when">{i.dates}</div>
-                                <ul>
-                                    {i.achievements.map((a) => (
-                                        <li key={a}>{a}</li>
-                                    ))}
-                                </ul>
-                                <Chips items={i.technologies} />
-                            </div>
-                        </div>
+                            <h3>{i.company}</h3>
+                            <div className="when">{i.dates}</div>
+                        </>
+                    ),
+                },
+                ...i.achievements.map((a, n) => ({
+                    id: `a${n}`,
+                    front: (
+                        <>
+                            <span className="hk">0{n + 1}</span>
+                            <p>{a}</p>
+                        </>
+                    ),
+                })),
+                {
+                    id: "tech",
+                    front: (
+                        <>
+                            <span className="hk">Stack</span>
+                            <Chips items={i.technologies} />
+                        </>
                     ),
                 },
             ],
@@ -245,25 +491,28 @@ function holoOf(id: ObjectId): HoloSpec {
                             <span className="hk">Paper</span>
                             <h3>{r.title}</h3>
                             <div className="when">{r.dates}</div>
-                            <p className="hsum">{r.points[0]}</p>
                             <small className="hmore">
                                 {r.points.length} {r.points.length === 1 ? "finding" : "findings"} · double-click to open
                             </small>
                         </>
                     ),
-                    detail: (
+                    detail: [
                         <>
+                            <span className="hk">Paper</span>
                             <h3>{r.title}</h3>
                             <div className="when">{r.dates}</div>
-                            <ul>
-                                {r.points.map((p) => (
-                                    <li key={p}>{p}</li>
-                                ))}
-                            </ul>
-                            <h4 className="sub">Figures</h4>
+                        </>,
+                        ...r.points.map((p, n) => (
+                            <>
+                                <span className="hk">Finding 0{n + 1}</span>
+                                <p>{p}</p>
+                            </>
+                        )),
+                        <>
+                            <span className="hk">Figures</span>
                             <Gallery photos={r.images} label="Figure" count={2} />
-                        </>
-                    ),
+                        </>,
+                    ],
                 })),
             };
         case "projects":
@@ -280,17 +529,25 @@ function holoOf(id: ObjectId): HoloSpec {
                             <small className="hmore">{p.stack.slice(0, 3).join(" · ")}</small>
                         </>
                     ),
-                    detail: (
+                    detail: [
                         <>
                             {p.badge && <span className="hk">{p.badge}</span>}
                             <h3>{p.name}</h3>
+                        </>,
+                        <>
+                            <span className="hk">About</span>
                             <p>{p.description}</p>
+                        </>,
+                        <>
+                            <span className="hk">Stack</span>
                             <Chips items={p.stack} />
                             <ProjectLinks p={p} />
-                            <h4 className="sub">Screenshots</h4>
+                        </>,
+                        <>
+                            <span className="hk">Screenshots</span>
                             <Gallery photos={p.images} label="Screenshot" count={2} />
-                        </>
-                    ),
+                        </>,
+                    ],
                 })),
             };
         case "collection":
@@ -308,30 +565,33 @@ function holoOf(id: ObjectId): HoloSpec {
                             <span>{b.name}</span>
                         </>
                     ),
-                    detail: (
-                        <>
-                            <div className="pinhero">
-                                {b.image && <img src={b.image} alt={`${b.name} pin`} />}
-                                <div>
-                                    <h3>{b.name}</h3>
-                                    <small>
-                                        {b.place}
-                                        {b.year ? ` · ${b.year}` : ""} · {b.group}
-                                    </small>
-                                </div>
+                    detail: [
+                        <div className="pinhero" key="hero">
+                            {b.image && <img src={b.image} alt={`${b.name} pin`} />}
+                            <div>
+                                <h3>{b.name}</h3>
+                                <small>
+                                    {b.place}
+                                    {b.year ? ` · ${b.year}` : ""} · {b.group}
+                                </small>
                             </div>
+                        </div>,
+                        <>
+                            <span className="hk">Story</span>
                             <p>{b.story ?? "The story behind this pin is coming soon."}</p>
-                            <h4 className="sub">From the trip</h4>
-                            <Gallery photos={b.photos} label={b.name} />
-                        </>
-                    ),
+                        </>,
+                        <>
+                            <span className="hk">From the trip</span>
+                            <Gallery photos={b.photos} label={b.name} count={2} />
+                        </>,
+                    ],
                 })),
             };
         case "cv":
             return {
                 kicker: "Document · CV.pdf",
                 title: "Curriculum vitae",
-                layout: "arc",
+                layout: "blocks",
                 items: [
                     ...education.map((e) => ({
                         id: e.school,
@@ -358,9 +618,18 @@ function holoOf(id: ObjectId): HoloSpec {
                                         </li>
                                     ))}
                                 </ul>
+                            </>
+                        ),
+                    },
+                    {
+                        id: "download",
+                        front: (
+                            <>
+                                <span className="hk">Full CV</span>
+                                <p>Two pages, PDF.</p>
                                 <div>
                                     <a className="btn" href={personalInfo.cv} download>
-                                        Download CV (PDF)
+                                        Download CV
                                     </a>
                                 </div>
                             </>
@@ -368,11 +637,18 @@ function holoOf(id: ObjectId): HoloSpec {
                     },
                 ],
             };
+        case "skills":
+            return {
+                kicker: `Processor · ${skills.length} cores`,
+                title: "Skills",
+                layout: "net",
+                items: [{ id: "skills", front: <SkillsNet /> }],
+            };
         case "contact":
             return {
                 kicker: "Handset · say hi",
                 title: "Contact",
-                layout: "single",
+                layout: "blocks",
                 items: [{ id: "contact", front: <Contact /> }],
             };
     }
@@ -390,6 +666,61 @@ function slotStyle(layout: HoloSpec["layout"], i: number, n: number): CSSPropert
     } as CSSProperties;
 }
 
+/**
+ * Where a hologram floats in the desk's own 3D space, around the object on the pad.
+ * x / y: position on the desk relative to the pad (in % of desk width, y negative = further back),
+ * h: height above the desk, w: width, yaw: turn towards the middle (deg). Lengths are in cqw.
+ */
+type Place = { x: number; y: number; h: number; w: number; yaw: number };
+/**
+ * n blocks around the object. Up to 3 fan out in a flat arc behind it; more stand in two columns either side,
+ * rows stepping back so none hides another (an odd one out sits behind the object).
+ */
+function ringPlace(i: number, n: number): Place {
+    if (n === 1) return { x: 0, y: 5, h: 1, w: 34, yaw: 0 };
+    if (n <= 3) {
+        const spread = n === 2 ? 110 : 140;
+        const t = -spread / 2 + (i * spread) / (n - 1);
+        const r = (t * Math.PI) / 180;
+        return { x: 30 * Math.sin(r), y: -11 * Math.cos(r), h: 1, w: 23, yaw: 0 };
+    }
+    if (n % 2 === 1 && i === n - 1) return { x: 0, y: -17, h: 1, w: 19, yaw: 0 };
+    const side = i % 2 ? 1 : -1;
+    const row = Math.floor(i / 2);
+    return { x: side * 29, y: -16 + row * 15, h: 1, w: 19, yaw: -side * 5 };
+}
+function worldPlace(spec: HoloSpec, i: number, n: number): Place {
+    switch (spec.layout) {
+        case "cloud": {
+            // pins on an ellipse all the way round, leaving a gap at the front for the header
+            const t = -150 + (i * 300) / (n - 1);
+            const r = (t * Math.PI) / 180;
+            return { x: 36 * Math.sin(r), y: -20 * Math.cos(r), h: 2 + (i % 3), w: 7.5, yaw: 0 };
+        }
+        case "net":
+            return { x: 0, y: 6, h: 1, w: 60, yaw: 0 };
+        default:
+            return ringPlace(i, n);
+    }
+}
+const placeStyle = (p: Place, i: number): CSSProperties =>
+    ({
+        "--x": p.x.toFixed(2),
+        "--y": p.y.toFixed(2),
+        "--h": p.h.toFixed(2),
+        "--w": p.w.toFixed(2),
+        "--yaw": p.yaw.toFixed(1),
+        "--i": i,
+        "--bob": `${(i * 0.37) % 2}s`,
+    }) as CSSProperties;
+/** a light trail on the desk from the pad to the foot of a hologram */
+const beamStyle = (p: Place, i: number): CSSProperties =>
+    ({
+        "--len": Math.hypot(p.x, p.y).toFixed(2),
+        "--ang": ((Math.atan2(p.y, p.x) * 180) / Math.PI).toFixed(1),
+        "--i": i,
+    }) as CSSProperties;
+
 function HoloStage({
     spec,
     padRef,
@@ -398,7 +729,9 @@ function HoloStage({
     setFocus,
     onClose,
     closeRef,
+    world,
 }: {
+    world: boolean;
     spec: HoloSpec;
     padRef: React.RefObject<HTMLDivElement | null>;
     writing: boolean;
@@ -415,6 +748,7 @@ function HoloStage({
     // every hologram rises out of the pad: measure the offset from each slot back to the pad, then let CSS fly it in
     useLayoutEffect(() => {
         const root = rootRef.current;
+        if (world) return; // in 3D they rise straight out of the pad (CSS), started after fit() below
         const pad = padRef.current?.getBoundingClientRect();
         if (!root || !pad) return;
         const px = pad.left + pad.width / 2;
@@ -425,7 +759,7 @@ function HoloStage({
             el.style.setProperty("--fy", `${py - (r.top + r.height / 2)}px`);
         });
         root.classList.add("rise");
-    }, [padRef]);
+    }, [padRef, world]);
 
     // write the text in once the holograms have arrived, and again for an opened item
     useLayoutEffect(() => {
@@ -434,7 +768,7 @@ function HoloStage({
         if (!scope) return;
         let i = 0;
         scope
-            .querySelectorAll<HTMLElement>(".hk, .hnote, h3, .when, p, li, .chips, .links, .btn, .copyrow, .hmore, .pinhero, .sub, .gallery")
+            .querySelectorAll<HTMLElement>(".hk, .hnote, h3, .when, p, li, .chips, .links, .btn, .copyrow, .hmore, .pinhero, .sub, .gallery, .skchip, .work")
             .forEach((el) => {
                 if (el.parentElement?.closest(".write")) return;
                 el.classList.add("write");
@@ -452,66 +786,146 @@ function HoloStage({
     }, [focus]);
 
     const opened = focus ? spec.items.find((it) => it.id === focus) : null;
-    const single = spec.layout === "single";
+    const panelOnly = spec.layout === "blocks" || spec.layout === "net";
 
+    // keep every hologram inside the visible scene: if any block would poke out, shrink the whole set about the pad
+    const fit = useCallback((settle = false) => {
+        const root = rootRef.current;
+        const pad = padRef.current;
+        const scene = root?.closest(".scene");
+        if (!world || !root || !pad || !scene) return;
+        const cur = parseFloat(root.style.getPropertyValue("--fit") || "1");
+        const sc = scene.getBoundingClientRect();
+        const desk = root.closest(".surface")?.getBoundingClientRect() ?? sc;
+        // sideways: stay within the desk; up/down: stay within the visible scene
+        const b = { left: desk.left, right: desk.right, top: sc.top, bottom: sc.bottom };
+        const m = 6;
+        const p = pad.getBoundingClientRect();
+        const px = p.left + p.width / 2;
+        const py = p.top + p.height / 2;
+        const sel = root.classList.contains("focused") ? ".hhead, .hdset > .hslot" : ".hhead, .hset > .hslot";
+        // measure where the holograms end up, not where their rise animation currently has them
+        if (settle) root.classList.add("measuring");
+        let k = Infinity;
+        root.querySelectorAll<HTMLElement>(sel).forEach((el) => {
+            const r = el.getBoundingClientRect();
+            if (r.left < px) k = Math.min(k, (px - b.left - m) / (px - r.left));
+            if (r.right > px) k = Math.min(k, (b.right - m - px) / (r.right - px));
+            if (r.top < py) k = Math.min(k, (py - b.top - m) / (py - r.top));
+            if (r.bottom > py) k = Math.min(k, (b.bottom - m - py) / (r.bottom - py));
+        });
+        if (settle) root.classList.remove("measuring");
+        if (!isFinite(k)) return;
+        const next = Math.max(0.5, Math.min(1, cur * k));
+        if (Math.abs(next - cur) > 0.005) root.style.setProperty("--fit", next.toFixed(3));
+    }, [world, padRef]);
+    useLayoutEffect(() => {
+        fit(true);
+        fit(true); // a second pass settles perspective effects
+        rootRef.current?.classList.add("rise");
+    }, [fit, focus]);
+    useEffect(() => {
+        const onResize = () => fit();
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, [fit]);
+
+    const n = spec.items.length;
     return (
-        <div
-            className={`stage ${spec.layout}${spec.warm ? " warm" : ""}${opened ? " focused" : ""}${writing ? " ready" : ""}`}
-            ref={rootRef}
-            role="region"
-            aria-labelledby="ptitle"
-        >
-            <header className="hhead hslot" style={slotStyle(spec.layout, 0, 1)}>
-                <div>
-                    <div className="kicker">{spec.kicker}</div>
-                    <h2 id="ptitle">{writing ? <Typewriter text={spec.title} speed={35} /> : <span className="sr-only">{spec.title}</span>}</h2>
-                    {spec.note && <p className="hnote">{spec.note}</p>}
-                </div>
-                <button className="close" type="button" ref={closeRef} onClick={onClose}>
-                    Put back ✕
-                </button>
-            </header>
+        <FocusCtx.Provider value={{ focus, setFocus }}>
+            <div
+                className={`stage ${world ? "world " : ""}${spec.layout}${spec.warm ? " warm" : ""}${opened ? " focused" : ""}${writing ? " ready" : ""}`}
+                ref={rootRef}
+                role="region"
+                aria-labelledby="ptitle"
+            >
+                <header
+                    className="hhead hslot"
+                    style={world ? placeStyle({ x: 0, y: 27, h: 0.5, w: 36, yaw: 0 }, 0) : slotStyle(spec.layout, 0, 1)}
+                >
+                    <div>
+                        <div className="kicker">{spec.kicker}</div>
+                        <h2 id="ptitle">
+                            {writing ? <Typewriter text={spec.title} speed={35} /> : <span className="sr-only">{spec.title}</span>}
+                        </h2>
+                        {spec.note && <p className="hnote">{spec.note}</p>}
+                    </div>
+                    <button className="close" type="button" ref={closeRef} onClick={onClose}>
+                        Put back ✕
+                    </button>
+                </header>
 
-            <div className="hset">
-                {spec.items.map((it, i) =>
-                    single ? (
-                        <div key={it.id} className="hslot" style={slotStyle(spec.layout, i, spec.items.length)}>
-                            <div className="hpanel big">{it.front}</div>
+                <div className="hset">
+                    {world &&
+                        spec.items.map((it, i) => (
+                            <i key={`b-${it.id}`} className="beam3d" style={beamStyle(worldPlace(spec, i, n), i)} />
+                        ))}
+                    {spec.items.map((it, i) => (
+                        <div
+                            key={it.id}
+                            className="hslot"
+                            style={world ? placeStyle(worldPlace(spec, i, n), i + 1) : slotStyle(spec.layout, i, n)}
+                        >
+                            {panelOnly ? (
+                                <div className={`hpanel${spec.layout === "net" || n === 1 ? " big" : ""}`}>{it.front}</div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="hpanel"
+                                    data-item={it.id}
+                                    aria-pressed={selected === it.id}
+                                    onClick={() => setSelected(it.id)}
+                                    onDoubleClick={() => it.detail && setFocus(it.id)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && it.detail) {
+                                            e.preventDefault();
+                                            setFocus(it.id);
+                                        }
+                                    }}
+                                >
+                                    {it.front}
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* an opened item: its content split into separate blocks around the object (stacked on phones) */}
+                {opened?.detail &&
+                    (world ? (
+                        <div className="hdset" ref={detailRef} key={opened.id}>
+                            {opened.detail.map((_, j) => (
+                                <i key={`b${j}`} className="beam3d" style={beamStyle(ringPlace(j, opened.detail!.length), j)} />
+                            ))}
+                            {opened.detail.map((block, j) => (
+                                <div key={j} className="hslot dslot" style={placeStyle(ringPlace(j, opened.detail!.length), j + 1)}>
+                                    <div className="hpanel">
+                                        {j === 0 && (
+                                            <button type="button" className="back" onClick={() => setFocus(null)}>
+                                                ← Back
+                                            </button>
+                                        )}
+                                        {block}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : (
-                        <div key={it.id} className="hslot" style={slotStyle(spec.layout, i, spec.items.length)}>
-                            <button
-                                type="button"
-                                className="hpanel"
-                                data-item={it.id}
-                                aria-pressed={selected === it.id}
-                                onClick={() => setSelected(it.id)}
-                                onDoubleClick={() => it.detail && setFocus(it.id)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && it.detail) {
-                                        e.preventDefault();
-                                        setFocus(it.id);
-                                    }
-                                }}
-                            >
-                                {it.front}
-                            </button>
+                        <div className="hdetail" ref={detailRef} key={opened.id}>
+                            <div className="hpanel big">
+                                <button type="button" className="back" onClick={() => setFocus(null)}>
+                                    ← Back
+                                </button>
+                                {opened.detail.map((block, j) => (
+                                    <div key={j} className="hblock">
+                                        {block}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    ),
-                )}
+                    ))}
             </div>
-
-            {opened?.detail && (
-                <div className="hdetail" ref={detailRef} key={opened.id}>
-                    <div className="hpanel big">
-                        <button type="button" className="back" onClick={() => setFocus(null)}>
-                            ← Back
-                        </button>
-                        {opened.detail}
-                    </div>
-                </div>
-            )}
-        </div>
+        </FocusCtx.Provider>
     );
 }
 
@@ -592,6 +1006,8 @@ function readoutOf(id: ObjectId): { type: string; label: string; count: number }
             return { type: "Handset", label: "Channels", count: 3 };
         case "collection":
             return { type: "Pin case", label: "Pins", count: collection.length };
+        case "skills":
+            return { type: "Processor", label: "Cores", count: skills.length };
     }
 }
 
@@ -672,6 +1088,15 @@ export default function ProjectionDesk() {
     const [ghost, setGhost] = useState<{ l: number; t: number; w: number; h: number } | null>(null);
     const [greeting, setGreeting] = useState(false);
     const [focus, setFocus] = useState<string | null>(null);
+    // phones get flat, stacked holograms; larger screens get them floating in the desk's 3D space
+    const [phone, setPhone] = useState(false);
+    useEffect(() => {
+        const mq = window.matchMedia("(max-width: 640px)");
+        const on = () => setPhone(mq.matches);
+        on();
+        mq.addEventListener("change", on);
+        return () => mq.removeEventListener("change", on);
+    }, []);
     const focusRef = useRef<string | null>(null);
     focusRef.current = focus;
 
@@ -1135,10 +1560,10 @@ export default function ProjectionDesk() {
                     <div className={`why${dragging === "collection" ? " lifted" : ""}`} ref={whyRef}>
                         the reason this desk exists
                     </div>
-                </div>
 
-                {openId && content && reached(phase, "outline") && (
+                    {!phone && openId && content && reached(phase, "outline") && (
                     <HoloStage
+                        world={true}
                         key={`stage-${scanKey}`}
                         spec={content}
                         padRef={padRef}
@@ -1152,8 +1577,27 @@ export default function ProjectionDesk() {
                             blipRef.current("drop");
                             if (cur) objRefs.current[cur]?.focus({ preventScroll: true });
                         }}
-                    />
-                )}
+                    />)}
+                </div>
+                {phone && openId && content && reached(phase, "outline") && (
+                    <HoloStage
+                        world={false}
+                        key={`stage-${scanKey}`}
+                        spec={content}
+                        padRef={padRef}
+                        writing={phase === "content"}
+                        focus={focus}
+                        setFocus={setFocus}
+                        closeRef={closeRef}
+                        onClose={() => {
+                            const cur = openRef.current;
+                            close();
+                            blipRef.current("drop");
+                            if (cur) objRefs.current[cur]?.focus({ preventScroll: true });
+                        }}
+                    />)}
+
+
             </div>
 
             <div className="hint">
