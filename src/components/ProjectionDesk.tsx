@@ -1122,21 +1122,23 @@ export default function ProjectionDesk() {
         });
     };
 
-    // first visit: the layout's inline script adds html.boot; end it once the sequence has played
+    // the layout's inline script adds html.boot on load; end it once the entry sequence has played
     useEffect(() => {
         const html = document.documentElement;
         if (!html.classList.contains("boot")) return;
         setGreeting(true);
-        const a = setTimeout(() => {
+        const end = () => {
             html.classList.remove("boot");
-            try {
-                localStorage.setItem("desk-booted", "1");
-            } catch {
-                /* storage blocked */
-            }
-        }, 2400);
+            window.removeEventListener("pointerdown", end, true);
+            window.removeEventListener("keydown", end, true);
+        };
+        // any click or key skips straight to the finished desk
+        window.addEventListener("pointerdown", end, true);
+        window.addEventListener("keydown", end, true);
+        const a = setTimeout(end, 2200);
         const b = setTimeout(() => setGreeting(false), 6500);
         return () => {
+            end();
             clearTimeout(a);
             clearTimeout(b);
         };
@@ -1426,6 +1428,7 @@ export default function ProjectionDesk() {
                     <div className="slab slab-f" aria-hidden="true" />
                     <div className="slab slab-l" aria-hidden="true" />
                     <div className="slab slab-r" aria-hidden="true" />
+                    <div className="glint" aria-hidden="true" />
                     <div className="glow" ref={glowRef} aria-hidden="true" />
                     <div className="etch">
                         MSc AI &amp; ML · Imperial College London
